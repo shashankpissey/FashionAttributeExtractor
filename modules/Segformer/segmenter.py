@@ -7,7 +7,9 @@ import os
 
 from utils.pipeline_config import PipelineConfig
 from .base_segmenter import BaseSegformer
+from utils.log_config import get_logger
 
+logger = get_logger(__name__)
 
 class Segmenter(BaseSegformer):
 
@@ -220,7 +222,7 @@ class Segmenter(BaseSegformer):
                         
         except Exception as e:
             print(e)
-        print(extracted_items)
+        logger.info(f"For {basename} total {len(extracted_items)} with keys{extracted_items.keys()} are extracted")
         return extracted_items
 
     def save_segments(self, img_pil, save_dir, group_name, basename):

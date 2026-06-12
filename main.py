@@ -8,7 +8,10 @@ from modules.person_detector import PersonDetector
 from modules.objects_detector_separator import ObjectsDetectorAndSeparate
 from utils.timer import timer
 import modules.Segformer.segformer_factory as sf
+from utils.log_config import get_logger
 
+
+logger = get_logger(__name__)
 
 def extraction_driver(person_detector, segmenter_obj, separator,save=False, pipeline_name="PIPELINE_B"):
     """
@@ -48,7 +51,7 @@ def extraction_driver(person_detector, segmenter_obj, separator,save=False, pipe
                 # Multiple people
 
                 all_people_box = person_detector.detect_all_people(input_image_path)
-                print(f"Detected all people {len(all_people_box)}")
+                logger.info(f"for image {basename}, detected all people {len(all_people_box)}")
 
                 for person_no, box in enumerate(all_people_box):
                     person_basename = f"{basename}_p{person_no}"
@@ -69,7 +72,7 @@ def extraction_driver(person_detector, segmenter_obj, separator,save=False, pipe
 @timer
 def execute_pipeline():
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    print("--------Start----------")
+    logger.info("--------Start----------")
     person_detector = PersonDetector(PERSON_DETECTION_MODEL, device)
     stage = "LOOK"
     segmenter_obj = sf.segformer_factory(stage, device)

@@ -7,6 +7,9 @@ import os
 from ultralytics import SAM
 
 from utils.pipeline_config import PipelineConfig
+from utils.log_config import get_logger
+
+logger = get_logger(__name__)
 
 
 class ObjectsDetectorAndSeparate:
@@ -26,7 +29,7 @@ class ObjectsDetectorAndSeparate:
     
     def detect_objects(self, image_obj, cropped_image, save, basename, group_name, min_pixels=2500):
 
-        save_dir = "E:/Masters/Dissertation/Code/backup/data/test/seg/test1"
+        save_dir = ""
         obj_dict = {}
         
         try:
@@ -130,6 +133,7 @@ class ObjectsDetectorAndSeparate:
             elif group_name == "upper" and "top" not in obj_dict:
                 obj_dict["top"] = cropped_image
 
+            logger.info(f"For {basename} total {len(obj_dict)} with keys{obj_dict.keys()} are extracted as multilayer upper clothes and accessories")
             return obj_dict
         except Exception as e:
             print(e)
@@ -323,6 +327,7 @@ class ObjectsDetectorAndSeparate:
                                 obj_dict[name]["full_dim"].convert("RGB").save(os.path.join(current_pipeline.full_dim_dir, f"{basename}_{name}.jpg"))
 
             print(obj_dict)
+            logger.info(f"For {basename} total {len(obj_dict)} with keys{obj_dict.keys()} are extracted from Object detection pipeline")
 
             return obj_dict
 
