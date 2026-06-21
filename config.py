@@ -11,19 +11,30 @@ SEGMENTATION_MODEL = "mattmdjaga/segformer_b2_clothes"
 # SEGMENTATION_MODEL = "matei-dorian/segformer-b5-finetuned-human-parsing"
 OBJECT_DETECTOR_MODEL = "valentinafevu/yolos-fashionpedia"
 SAM_MODEL = "facebook/sam-vit-base"
+GROUNDING_DINO_MODEL ="IDEA-Research/grounding-dino-base"
+
+DINO_PROMPT = "tshirt . offshoulder top . tank top . blouse . sweater . dress . jacket . coat . skirt . pants . bag . shoes . sunglasses . belt . hat ."
+MUTUALLY_EXCLUSIVE_GARMENTS = [
+            ("skirt", "pants"),
+            ("skirt", "trousers"),
+            ("trousers", "pants"),
+            ("skirt", "dress"),
+            ("outer_top", "top")
+            ]
 
 
 # mattmdjafa key
 
 
-# Input Location
-INPUT_IMAGES = "E:/Masters/Dissertation/Code/backup/data/"
-# Save Locations
-CROPPED_IMAGES = "E:/Masters/Dissertation/Code/backup/data/test/person_detect_output/"
-PIPELINE_B_SEG_IMAGES = "E:/Masters/Dissertation/Code/backup/data/test/seg/pipeline_B/segmented_b/"
-PIPELINE_B_FULL_DIM_IMAGES = "E:/Masters/Dissertation/Code/backup/data/test/seg/pipeline_B/full_dimmed/"
-PIPELINE_B_DIM_IMAGES = "E:/Masters/Dissertation/Code/backup/data/test/seg/pipeline_B/seg_dimmed/"
-PIPELINE_A_SEG_IMAGES = "E:/Masters/Dissertation/Code/backup/data/test/seg/pipeline_A/segmented_a"
-PIPELINE_A_FULL_DIM_IMAGES = "E:/Masters/Dissertation/Code/backup/data/test/seg/pipeline_A/full_dimmed/"
-PIPELINE_C_SEG_IMAGES = "E:/Masters/Dissertation/Code/backup/data/test/seg/pipeline_C/segmented_c"
-PIPELINE_C_FULL_DIM_IMAGES = "E:/Masters/Dissertation/Code/backup/data/test/seg/pipeline_C/full_dimmed/"
+# # Input Location
+# INPUT_IMAGES = ""
+# # Save Locations
+# CROPPED_IMAGES = ""
+# PIPELINE_B_SEG_IMAGES = ""
+# PIPELINE_B_FULL_DIM_IMAGES = ""
+# PIPELINE_B_DIM_IMAGES = ""
+# PIPELINE_A_SEG_IMAGES = ""
+# PIPELINE_A_FULL_DIM_IMAGES = ""
+# PIPELINE_C_SEG_IMAGES = ""
+# PIPELINE_C_FULL_DIM_IMAGES = ""
+

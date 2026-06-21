@@ -1,3 +1,4 @@
+import json
 import cv2
 import torch
 import numpy as np
@@ -18,7 +19,7 @@ class ObjectsDetectorAndSeparate:
         self.device = device
         self.obj_processor = YolosImageProcessor.from_pretrained(obj_model)
         self.obj_model = YolosForObjectDetection.from_pretrained(obj_model).to(device).eval()
-        self.sam_model_obj = SAM("mobile_sam.pt")
+        self.sam_model_obj = SAM("sam2.1_l.pt")
 
     def sam_clipper(self, image, box):
         results = self.sam_model_obj(image, bboxes = box, verbose=False)
@@ -43,7 +44,7 @@ class ObjectsDetectorAndSeparate:
 
             h, w = image_obj.shape[:2]
             target_sizes = torch.tensor([[h,w]])
-            results = self.obj_processor.post_process_object_detection(outputs=obj_outputs, target_sizes=target_sizes, threshold=0.30)[0]
+            results = self.obj_processor.post_process_object_detection(outputs=obj_outputs, target_sizes=target_sizes, threshold=0.20)[0]
             print("obtained the results")
             # print(results)
         
@@ -67,11 +68,11 @@ class ObjectsDetectorAndSeparate:
                     best_detections[c_id] = {"score": score, "label": label, "box": box}
 
             for det in best_detections.values():
-                score = det["score"]
-                label = det["label"]
+                score = det["score"].item()
+                label = det["label"].item()
                 box = det["box"]
                 
-                class_id = label.item()
+                class_id = label
                 box_coordinates = [float(i) for i in box.tolist()]
                 class_name = self.obj_model.config.id2label[class_id].replace(", ","_").replace(" ","_")
 
@@ -84,7 +85,11 @@ class ObjectsDetectorAndSeparate:
                         accessories_rgba[:, :, 3] = mask
                         accessory_image = Image.fromarray(accessories_rgba)
 
-                        obj_dict[class_name] = accessory_image
+                        obj_dict[class_name] = {
+                            "image": accessory_image,
+                            "box": box_coordinates,
+                            "score": score
+                            }
                         if save:
                             self.save_segments(accessory_image, save_dir, class_name, basename)
 
@@ -112,8 +117,16 @@ class ObjectsDetectorAndSeparate:
                         if np.count_nonzero(final_outer_top) > 1000 and outer_ratio > 0.20:
                             outer_top = Image.fromarray(np.dstack((rgb, final_outer_top)))
                             top = Image.fromarray(np.dstack((rgb, final_top)))
-                            obj_dict["top"] = top
-                            obj_dict["outer_top"] = outer_top
+                            obj_dict["top"] = {
+                            "image": top, 
+                            "box": box_coordinates, 
+                            "score": score
+                            }
+                            obj_dict["outer_top"] = {
+                                "image": outer_top, 
+                                "box": box_coordinates, 
+                                "score": score
+                            }
                             # del items_list["upper"]
                             if save:
                                 self.save_segments(top, save_dir, "top", basename)
@@ -121,22 +134,38 @@ class ObjectsDetectorAndSeparate:
                     
                         else:
                             print("Small coat area found hence ignored the layers and full image retained")
-                            obj_dict["top"] = cropped_image
+                            obj_dict["top"] = {
+                                "image": cropped_image,
+                                "box": box_coordinates,
+                                "score": score
+                                }
                     else:
                         print("No Coat so no separation")
-                        obj_dict["top"] = cropped_image
+                        obj_dict["top"] = {
+                            "image": cropped_image,
+                            "box": box_coordinates,
+                            "score": score
+                            }
                 else:
                     print("No upper class found")
             
             if group_name == "dress":
-                obj_dict["dress"] = cropped_image
+                obj_dict["dress"] = {
+                            "image": cropped_image,
+                            "box": box_coordinates if 'box_coordinates' in locals() else [0.0, 0.0, 0.0, 0.0],
+                            "score": score if 'score' in locals() else 1.0
+                            }
             elif group_name == "upper" and "top" not in obj_dict:
-                obj_dict["top"] = cropped_image
+                obj_dict["top"] = {
+                            "image": cropped_image,
+                            "box": box_coordinates if 'box_coordinates' in locals() else [0.0, 0.0, 0.0, 0.0],
+                            "score": score if 'score' in locals() else 1.0
+                            }
 
             logger.info(f"For {basename} total {len(obj_dict)} with keys{obj_dict.keys()} are extracted as multilayer upper clothes and accessories")
             return obj_dict
         except Exception as e:
-            print(e)
+            logger.error(e)
 
     def save_segments(self, img_pil, save_dir, group_name, basename):
         save_path = os.path.join(save_dir, f"{basename}_{group_name}.png")
@@ -267,7 +296,12 @@ class ObjectsDetectorAndSeparate:
                     mask = self.sam_clipper(image_obj, box)
                     combined_mask = cv2.bitwise_or(combined_mask, mask)
                 
-                class_masks[c_id] = {"name": class_name, "mask": combined_mask}
+                class_masks[c_id] = {
+                    "name": class_name,
+                    "mask": combined_mask,
+                    "yolo_box": data["boxes"][0],
+                    "yolo_score": data["score"]
+                    }
 
             garment_min_area = total_area * 0.001
             accessory_min_area = total_area * 0.0005
@@ -287,13 +321,26 @@ class ObjectsDetectorAndSeparate:
                     
                     if np.count_nonzero(mask) > threshold:
                         processed_items = self.get_garment_crops(mask, image_rgba, image_obj)
+                        eval_mask_pil = Image.fromarray((mask > 0).astype(np.uint8) * 255, mode="L")
+                        processed_items["eval_mask"] = eval_mask_pil
+                        processed_items["yolo_box"] = data["yolo_box"]
+                        processed_items["yolo_score"] = data["yolo_score"]
                         obj_dict[class_name] = processed_items
                         if save:
-                            crop_path = os.path.join(save_dir, f"{basename}_{class_name}_crop.png")
+                            crop_path = os.path.join(save_dir, f"{basename}_{class_name}.png")
                             full_dim_path = os.path.join(current_pipeline.full_dim_dir, f"{basename}_{class_name}_dim.jpg")
-                            
+                            eval_dir = os.path.join(save_dir, "evaluation")
+                            os.makedirs(eval_dir, exist_ok=True)
                             processed_items["seg_crop"].save(crop_path)
                             processed_items["full_dim"].convert("RGB").save(full_dim_path)
+                            eval_mask_pil.save(os.path.join(eval_dir, f"{basename}_{class_name}_mask.png"))
+                            bbox_data = {
+                                "class_name": class_name,
+                                "box_coordinates": data["yolo_box"],
+                                "confidence": data["yolo_score"]
+                            }
+                            with open(os.path.join(eval_dir, f"{basename}_{class_name}_box.json"), "w") as f:
+                                json.dump(bbox_data, f)
 
             if skirt_class in class_masks and pants_class in class_masks:
                 print("Detected skirt worn over pants. Separating layers...")
@@ -304,27 +351,57 @@ class ObjectsDetectorAndSeparate:
                 
                 if np.count_nonzero(skirt_mask) > garment_min_area:
                     name = class_masks[skirt_class]["name"]
-                    obj_dict[name] = self.get_garment_crops(skirt_mask, image_rgba, image_obj)
+                    processed_skirt = self.get_garment_crops(skirt_mask, image_rgba, image_obj)
+                    
+                    processed_skirt["eval_mask"] = Image.fromarray((skirt_mask > 0).astype(np.uint8) * 255, mode="L")
+                    processed_skirt["yolo_box"] = class_masks[skirt_class]["yolo_box"]
+                    processed_skirt["yolo_score"] = class_masks[skirt_class]["yolo_score"]
+                    obj_dict[name] = processed_skirt
                     if save:
-                        obj_dict[name]["seg_crop"].save(os.path.join(save_dir, f"{basename}_{name}_crop.png"))
+                        obj_dict[name]["seg_crop"].save(os.path.join(save_dir, f"{basename}_{name}.png"))
                         obj_dict[name]["full_dim"].convert("RGB").save(os.path.join(current_pipeline.full_dim_dir, f"{basename}_{name}_dim.jpg"))
+                        eval_dir = os.path.join(save_dir, "evaluation")
+                        os.makedirs(eval_dir, exist_ok=True)
+                        obj_dict[name]["eval_mask"].save(os.path.join(eval_dir, f"{basename}_{name}_mask.png"))
+                        with open(os.path.join(eval_dir, f"{basename}_{name}_box.json"), "w") as f:
+                            json.dump({"class_name": name, "box_coordinates": obj_dict[name]["yolo_box"], "confidence": obj_dict[name]["yolo_score"]}, f)
                     
                 if np.count_nonzero(pure_pants_mask) > garment_min_area:
                     name = class_masks[pants_class]["name"]
-                    obj_dict[name] = self.get_garment_crops(pure_pants_mask, image_rgba, image_obj)
+                    processed_pants = self.get_garment_crops(pure_pants_mask, image_rgba, image_obj)
+                    
+                    processed_pants["eval_mask"] = Image.fromarray((pure_pants_mask > 0).astype(np.uint8) * 255, mode="L")
+                    processed_pants["yolo_box"] = class_masks[pants_class]["yolo_box"]
+                    processed_pants["yolo_score"] = class_masks[pants_class]["yolo_score"]
+                    obj_dict[name] = processed_pants
                     if save:
-                        obj_dict[name]["seg_crop"].save(os.path.join(save_dir, f"{basename}_{name}_crop.png"))
+                        obj_dict[name]["seg_crop"].save(os.path.join(save_dir, f"{basename}_{name}.png"))
                         obj_dict[name]["full_dim"].convert("RGB").save(os.path.join(current_pipeline.full_dim_dir, f"{basename}_{name}_dim.jpg"))
+                        eval_dir = os.path.join(save_dir, "evaluation")
+                        os.makedirs(eval_dir, exist_ok=True)
+                        obj_dict[name]["eval_mask"].save(os.path.join(eval_dir, f"{basename}_{name}_mask.png"))
+                        with open(os.path.join(eval_dir, f"{basename}_{name}_box.json"), "w") as f:
+                            json.dump({"class_name": name, "box_coordinates": obj_dict[name]["yolo_box"], "confidence": obj_dict[name]["yolo_score"]}, f)
             else:
                 for target_class in [skirt_class, pants_class]:
                     if target_class in class_masks:
                         mask = class_masks[target_class]["mask"]
                         name = class_masks[target_class]["name"]
                         if np.count_nonzero(mask) > garment_min_area:
-                            obj_dict[name] = self.get_garment_crops(mask, image_rgba, image_obj)
+                            processed_bottom = self.get_garment_crops(mask, image_rgba, image_obj)
+                            
+                            processed_bottom["eval_mask"] = Image.fromarray((mask > 0).astype(np.uint8) * 255, mode="L")
+                            processed_bottom["yolo_box"] = class_masks[target_class]["yolo_box"]
+                            processed_bottom["yolo_score"] = class_masks[target_class]["yolo_score"]
+                            obj_dict[name] = processed_bottom
                             if save:
                                 obj_dict[name]["seg_crop"].save(os.path.join(save_dir, f"{basename}_{name}.png"))
                                 obj_dict[name]["full_dim"].convert("RGB").save(os.path.join(current_pipeline.full_dim_dir, f"{basename}_{name}.jpg"))
+                                eval_dir = os.path.join(save_dir, "evaluation")
+                                os.makedirs(eval_dir, exist_ok=True)
+                                obj_dict[name]["eval_mask"].save(os.path.join(eval_dir, f"{basename}_{name}_mask.png"))
+                                with open(os.path.join(eval_dir, f"{basename}_{name}_box.json"), "w") as f:
+                                    json.dump({"class_name": name, "box_coordinates": obj_dict[name]["yolo_box"], "confidence": obj_dict[name]["yolo_score"]}, f)
 
             print(obj_dict)
             logger.info(f"For {basename} total {len(obj_dict)} with keys{obj_dict.keys()} are extracted from Object detection pipeline")
@@ -332,7 +409,7 @@ class ObjectsDetectorAndSeparate:
             return obj_dict
 
         except Exception as e:
-            print(f"Error during segmentation: {e}")
+            logger.error(f"Error during segmentation: {e}")
             return obj_dict
         
     def get_garment_crops(self, mask, image_rgba, image_obj):

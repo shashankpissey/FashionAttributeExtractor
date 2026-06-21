@@ -1,20 +1,24 @@
 from enum import Enum
+from config import PIPELINE_A_FULL_DIM_IMAGES,PIPELINE_A_SEG_IMAGES,PIPELINE_A_EVAL_IMAGES,PIPELINE_B_DIM_IMAGES,PIPELINE_B_FULL_DIM_IMAGES,PIPELINE_B_SEG_IMAGES,PIPELINE_B_EVAL_IMAGES,PIPELINE_C_FULL_DIM_IMAGES,PIPELINE_C_SEG_IMAGES,PIPELINE_C_EVAL_IMAGES
 
 class PipelineConfig(Enum):
     PIPELINE_A = {
-        "SEG_IMAGES": "E:/Masters/Dissertation/Code/backup/data/test/seg/pipeline_A/segmented_a",
-        "FULL_DIM_IMAGES": "E:/Masters/Dissertation/Code/backup/data/test/seg/pipeline_A/full_dimmed/",
-        "DIM_IMAGES": "E:/Masters/Dissertation/Code/backup/data/test/seg/pipeline_A/seg_dimmed/"
+        "SEG_IMAGES": PIPELINE_A_SEG_IMAGES,
+        "FULL_DIM_IMAGES": PIPELINE_A_FULL_DIM_IMAGES,
+        "DIM_IMAGES": "",
+        "EVAL_DIR": PIPELINE_A_EVAL_IMAGES
         }
     PIPELINE_B = {
-        "SEG_IMAGES": "E:/Masters/Dissertation/Code/backup/data/test/seg/pipeline_B/segmented_b",
-        "FULL_DIM_IMAGES": "E:/Masters/Dissertation/Code/backup/data/test/seg/pipeline_B/full_dimmed/",
-        "DIM_IMAGES": "E:/Masters/Dissertation/Code/backup/data/test/seg/pipeline_B/seg_dimmed/"
+        "SEG_IMAGES": PIPELINE_B_SEG_IMAGES,
+        "FULL_DIM_IMAGES": PIPELINE_B_FULL_DIM_IMAGES,
+        "DIM_IMAGES": PIPELINE_B_DIM_IMAGES,
+        "EVAL_DIR": PIPELINE_B_EVAL_IMAGES
         }
     PIPELINE_C = {
-        "SEG_IMAGES": "E:/Masters/Dissertation/Code/backup/data/test/seg/pipeline_C/segmented_c",
-        "FULL_DIM_IMAGES": "E:/Masters/Dissertation/Code/backup/data/test/seg/pipeline_C/full_dimmed/",
-        "DIM_IMAGES": "E:/Masters/Dissertation/Code/backup/data/test/seg/pipeline_C/seg_dimmed/"
+        "SEG_IMAGES": PIPELINE_C_SEG_IMAGES,
+        "FULL_DIM_IMAGES": PIPELINE_C_FULL_DIM_IMAGES,
+        "DIM_IMAGES": "",
+        "EVAL_DIR": PIPELINE_C_EVAL_IMAGES
         }
 
     @property
@@ -28,3 +32,7 @@ class PipelineConfig(Enum):
     @property
     def full_dim_dir(self):
         return self.value["FULL_DIM_IMAGES"]
+    
+    @property
+    def eval_dir(self):
+        return self.value["EVAL_DIR"]
