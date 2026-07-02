@@ -7,6 +7,7 @@ from PIL import Image
 
 from utils.pipeline_config import PipelineConfig
 from utils.log_config import get_logger
+from utils.calculate_conf import calculate_conf_metadata
 from ..objects_detector_separator import ObjectsDetectorAndSeparate
 from config import DINO_PROMPT, MUTUALLY_EXCLUSIVE_GARMENTS
 
@@ -223,26 +224,34 @@ class GroundingDINO:
                 full_dim_arr = np.where(bool_mask_3d, image_obj, dimmed_rgb)
                 full_dim_pil = Image.fromarray(full_dim_arr)
 
+                metadata = calculate_conf_metadata(
+                    combined_mask,
+                    union_box,
+                    h,w
+                )
+
                 extracted_items[category] = {
                     "seg_crop": final_crop_pil,
                     "full_dim": full_dim_pil,
                     "eval_mask": eval_mask_pil,
-                    "dino_box": union_box
+                    "dino_box": union_box,
+                    "metadata": metadata
                     }
 
                 if save:
                     self.save_segments(img_pil=final_crop_pil, save_dir=current_pipeline.seg_dir, basename=basename, group_name=category)
                     self.save_segments(img_pil=full_dim_pil, save_dir=current_pipeline.full_dim_dir, basename=basename, group_name=category)
-                    eval_dir = os.path.join(current_pipeline.seg_dir, "evaluation")
-                    os.makedirs(eval_dir, exist_ok=True)
-                    extracted_items[category]["eval_mask"].save(os.path.join(eval_dir, f"{basename}_{category}_mask.png"))
+                    self.save_segments(img_pil=eval_mask_pil, save_dir=current_pipeline.eval_dir,basename=basename, group_name=category+"+mask")
                     bbox_data = {
                         "class_name": category,
                         "box_coordinates": extracted_items[category]["dino_box"],
                         "confidence": 1.0
                     }
-                    with open(os.path.join(eval_dir, f"{basename}_{category}_box.json"), "w") as f:
+                    with open(os.path.join(current_pipeline.eval_dir, f"{basename}_{category}_box.json"), "w") as f:
                         json.dump(bbox_data, f)
+                    with open(os.path.join(current_pipeline.eval_dir+"/conf/", f"{basename}_{category}_meta.json"), "w") as f:
+                        json.dump(metadata, f, indent=4)
+        
         
         logger.info(f"For {basename} total {len(extracted_items)} with keys{extracted_items.keys()} are extracted")
         print(extracted_items)

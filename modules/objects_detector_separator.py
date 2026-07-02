@@ -7,6 +7,7 @@ from PIL import Image
 import os
 from ultralytics import SAM
 
+from utils.calculate_conf import calculate_conf_metadata
 from utils.pipeline_config import PipelineConfig
 from utils.log_config import get_logger
 
@@ -329,8 +330,7 @@ class ObjectsDetectorAndSeparate:
                         if save:
                             crop_path = os.path.join(save_dir, f"{basename}_{class_name}.png")
                             full_dim_path = os.path.join(current_pipeline.full_dim_dir, f"{basename}_{class_name}_dim.jpg")
-                            eval_dir = os.path.join(save_dir, "evaluation")
-                            os.makedirs(eval_dir, exist_ok=True)
+                            eval_dir = current_pipeline.eval_dir
                             processed_items["seg_crop"].save(crop_path)
                             processed_items["full_dim"].convert("RGB").save(full_dim_path)
                             eval_mask_pil.save(os.path.join(eval_dir, f"{basename}_{class_name}_mask.png"))
@@ -341,6 +341,8 @@ class ObjectsDetectorAndSeparate:
                             }
                             with open(os.path.join(eval_dir, f"{basename}_{class_name}_box.json"), "w") as f:
                                 json.dump(bbox_data, f)
+                            with open(os.path.join(eval_dir+"/conf/", f"{basename}_{class_name}_meta.json"), "w") as f:
+                                json.dump(processed_items["metadata"], f, indent=4)
 
             if skirt_class in class_masks and pants_class in class_masks:
                 print("Detected skirt worn over pants. Separating layers...")
@@ -360,11 +362,12 @@ class ObjectsDetectorAndSeparate:
                     if save:
                         obj_dict[name]["seg_crop"].save(os.path.join(save_dir, f"{basename}_{name}.png"))
                         obj_dict[name]["full_dim"].convert("RGB").save(os.path.join(current_pipeline.full_dim_dir, f"{basename}_{name}_dim.jpg"))
-                        eval_dir = os.path.join(save_dir, "evaluation")
-                        os.makedirs(eval_dir, exist_ok=True)
+                        eval_dir = current_pipeline.eval_dir
                         obj_dict[name]["eval_mask"].save(os.path.join(eval_dir, f"{basename}_{name}_mask.png"))
                         with open(os.path.join(eval_dir, f"{basename}_{name}_box.json"), "w") as f:
                             json.dump({"class_name": name, "box_coordinates": obj_dict[name]["yolo_box"], "confidence": obj_dict[name]["yolo_score"]}, f)
+                        with open(os.path.join(eval_dir+"/conf/", f"{basename}_{name}_meta.json"), "w") as f:
+                            json.dump(obj_dict[name]["metadata"], f, indent=4)
                     
                 if np.count_nonzero(pure_pants_mask) > garment_min_area:
                     name = class_masks[pants_class]["name"]
@@ -377,11 +380,12 @@ class ObjectsDetectorAndSeparate:
                     if save:
                         obj_dict[name]["seg_crop"].save(os.path.join(save_dir, f"{basename}_{name}.png"))
                         obj_dict[name]["full_dim"].convert("RGB").save(os.path.join(current_pipeline.full_dim_dir, f"{basename}_{name}_dim.jpg"))
-                        eval_dir = os.path.join(save_dir, "evaluation")
-                        os.makedirs(eval_dir, exist_ok=True)
+                        eval_dir = current_pipeline.eval_dir
                         obj_dict[name]["eval_mask"].save(os.path.join(eval_dir, f"{basename}_{name}_mask.png"))
                         with open(os.path.join(eval_dir, f"{basename}_{name}_box.json"), "w") as f:
                             json.dump({"class_name": name, "box_coordinates": obj_dict[name]["yolo_box"], "confidence": obj_dict[name]["yolo_score"]}, f)
+                        with open(os.path.join(eval_dir+"/conf/", f"{basename}_{name}_meta.json"), "w") as f:
+                                    json.dump(obj_dict[name]["metadata"], f, indent=4)
             else:
                 for target_class in [skirt_class, pants_class]:
                     if target_class in class_masks:
@@ -397,11 +401,13 @@ class ObjectsDetectorAndSeparate:
                             if save:
                                 obj_dict[name]["seg_crop"].save(os.path.join(save_dir, f"{basename}_{name}.png"))
                                 obj_dict[name]["full_dim"].convert("RGB").save(os.path.join(current_pipeline.full_dim_dir, f"{basename}_{name}.jpg"))
-                                eval_dir = os.path.join(save_dir, "evaluation")
-                                os.makedirs(eval_dir, exist_ok=True)
+                                eval_dir = current_pipeline.eval_dir
                                 obj_dict[name]["eval_mask"].save(os.path.join(eval_dir, f"{basename}_{name}_mask.png"))
                                 with open(os.path.join(eval_dir, f"{basename}_{name}_box.json"), "w") as f:
                                     json.dump({"class_name": name, "box_coordinates": obj_dict[name]["yolo_box"], "confidence": obj_dict[name]["yolo_score"]}, f)
+                                with open(os.path.join(eval_dir+"/conf/", f"{basename}_{name}_meta.json"), "w") as f:
+                                    json.dump(obj_dict[name]["metadata"], f, indent=4)
+
 
             print(obj_dict)
             logger.info(f"For {basename} total {len(obj_dict)} with keys{obj_dict.keys()} are extracted from Object detection pipeline")
@@ -422,12 +428,17 @@ class ObjectsDetectorAndSeparate:
         tight_crop_pil = Image.fromarray(tight_rgba[y0:y1+1, x0:x1+1], mode="RGBA")
         
         dimmed_rgb = (image_obj * 0.25).astype(np.uint8)
+        h, w, c = image_obj.shape
         
         bool_mask_3d = np.expand_dims(mask > 0, axis=-1)
         full_dim_arr = np.where(bool_mask_3d, image_obj, dimmed_rgb)
         full_dim_pil = Image.fromarray(full_dim_arr)
+
+        metadata = calculate_conf_metadata(mask.astype(np.uint8), [int(x0), int(y0), int(x1), int(y1)], h, w)
+        metadata["bbox"] = [int(x0), int(y0), int(x1), int(y1)]
         
         return {
             "seg_crop": tight_crop_pil,
-            "full_dim": full_dim_pil
+            "full_dim": full_dim_pil,
+            "metadata": metadata
         }

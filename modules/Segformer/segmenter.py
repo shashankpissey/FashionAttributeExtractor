@@ -9,6 +9,7 @@ import os
 from utils.pipeline_config import PipelineConfig
 from .base_segmenter import BaseSegformer
 from utils.log_config import get_logger
+from utils.calculate_conf import calculate_conf_metadata
 
 logger = get_logger(__name__)
 
@@ -158,6 +159,10 @@ class Segmenter(BaseSegformer):
                     upper_group = separator.detect_objects(image_obj, full_size_pil, save=False, basename=basename, group_name=group_name)
                     
                     if not upper_group or (len(upper_group) == 1 and key in upper_group):
+                        
+                        metadata = calculate_conf_metadata(clean_mask_uint8, [int(x0), int(y0), int(x1), int(y1)], h, w)
+                        metadata["bbox"] = [int(x0), int(y0), int(x1), int(y1)]
+
                         full_dim = self.create_full_dim(image_obj=image_obj, target_mask=mask, opacity=0.25)
                         garment_dim = self.create_dim_external_mask(image_obj=image_obj, target_mask=mask, opacity=0.25, context_masks=context)
                         eval_mask_pil = Image.fromarray(mask_uint8, mode="L")
@@ -165,7 +170,8 @@ class Segmenter(BaseSegformer):
                             "seg_crop": tight_crop_pil, 
                             "garment_dim": garment_dim, 
                             "full_dim": full_dim,
-                            "eval_mask": eval_mask_pil}
+                            "eval_mask": eval_mask_pil,
+                            "metadata": metadata}
                     else:
                         for layer_name, layer_data in upper_group.items():
                             if isinstance(layer_data, dict):
@@ -181,8 +187,15 @@ class Segmenter(BaseSegformer):
                                 ly0, lx0 = layer_coords.min(axis=0)
                                 ly1, lx1 = layer_coords.max(axis=0)
                                 tight_layer_pil = Image.fromarray(np.array(layer_pil)[ly0:ly1, lx0:lx1], mode="RGBA")
+
+                                metadata = calculate_conf_metadata(layer_mask.astype(np.uint8), [int(lx0), int(ly0), int(lx1), int(ly1)], h, w)
+                                metadata["bbox"] = [int(lx0), int(ly0), int(lx1), int(ly1)]
+                                metadata["yolo_score"] = yolo_score
+                                metadata["yolo_box"] = yolo_box
+                                
                             else:
                                 tight_layer_pil = layer_pil
+                                metadata = calculate_conf_metadata(layer_pil.astype(np.uint8), [int(x0), int(y0), int(x1), int(y1)], h, w)
                                 
                             full_dim = self.create_full_dim(image_obj=image_obj, target_mask=layer_mask, opacity=0.25)
                             garment_dim = self.create_dim_external_mask(image_obj=image_obj, target_mask=layer_mask, opacity=0.25, context_masks=[face_mask, arms_mask])
@@ -193,9 +206,12 @@ class Segmenter(BaseSegformer):
                             "full_dim": full_dim,
                             "eval_mask": eval_layer_mask_pil,
                             "yolo_box": yolo_box,
-                            "yolo_score": yolo_score
+                            "yolo_score": yolo_score,
+                            "metadata": metadata
                             }
                 else:
+                    metadata = calculate_conf_metadata(clean_mask_uint8.astype(np.uint8), [int(x0), int(y0), int(x1), int(y1)], h, w)
+                    metadata["bbox"] = [int(x0), int(y0), int(x1), int(y1)]
                     context = []
                     if group_name in ["skirt", "pants"]:
                         context = [legs_mask, shoes_mask]
@@ -213,7 +229,8 @@ class Segmenter(BaseSegformer):
                         "seg_crop": tight_crop_pil,
                         "garment_dim": garment_dim,
                         "full_dim": full_dim,
-                        "eval_mask": eval_mask_pil
+                        "eval_mask": eval_mask_pil,
+                        "metadata": metadata
                         }
 
                 # print(extracted_items)
@@ -231,6 +248,10 @@ class Segmenter(BaseSegformer):
                             }
                             with open(os.path.join(current_pipeline.eval_dir, f"{basename}_{item_name}_box.json"), "w") as f:
                                 json.dump(bbox_data, f)
+                        
+                        if "metadata" in item_dict:
+                            with open(os.path.join(current_pipeline.eval_dir+"/conf/", f"{basename}_{item_name}_meta.json"), "w") as f:
+                                json.dump(item_dict["metadata"], f, indent=4)
 
         except Exception as e:
             print(f"Error in extract_seg: {e}")
