@@ -18,9 +18,14 @@ class GroundingDINO:
     def __init__(self, model, device):
         self.device = device
         self.processor = AutoProcessor.from_pretrained(model)
-        self.model = GroundingDinoForObjectDetection.from_pretrained(model)
+        self.model = GroundingDinoForObjectDetection.from_pretrained(model).to(self.device)
+        self.box_threshold = 0.2
+        self.text_threshold = 0.25
 
-    def get_obj_boxes(self, image_obj, text_prompt):
+    def get_obj_boxes(self, image_obj, text_prompt, box_threshold=0.2, text_threshold=0.25):
+        """
+        This method runs the inference on Grounding DINO based on the passed threshold and then returns the boxes and its correxponding labels. Code similar to huggingface for drawing the inference
+        """
         image = Image.fromarray(image_obj)
 
         inputs = self.processor(images=image, text=text_prompt, return_tensors="pt").to(self.device)
@@ -30,8 +35,8 @@ class GroundingDINO:
         results = self.processor.post_process_grounded_object_detection(
             outputs,
             inputs.input_ids,
-            box_threshold=0.20,
-            text_threshold=0.25,
+            box_threshold=box_threshold,
+            text_threshold=text_threshold,
             target_sizes=[image.size[::-1]]
         )
         print(results)
@@ -42,6 +47,9 @@ class GroundingDINO:
         return boxes, labels
     
     def filter_items(self, boxes, category):
+        """
+        This method is used to filter the items based on the fashion garment domain to filter duplicate tops from dressed and bottoms that occupy whole image.
+        """
         if not boxes:
             return None
         
@@ -57,11 +65,13 @@ class GroundingDINO:
             ratio = box_height / box_width if box_width > 0 else 0
 
             if category in ["top", "tshirt"]:
+                # 2.2 is derived from normal ratio from domain that a top always has a width < 2 to its height
                 if ratio > 2.2:
                     continue
             elif category in ["skirt", "pants"]:
-                print(ymin)
-                print(box_height)
+                # If a pant or skirt is starting from the top and occupies most of the pixels then drop these
+                # print(ymin)
+                # print(box_height)
                 if ymin < 50 and box_height > 1000:
                     continue
             valid_boxes.append(box)
@@ -77,6 +87,9 @@ class GroundingDINO:
             return [sorted_boxes[0]]
 
     def calculate_iou(self, box1, box2):
+        """
+        Calculate the  IoU between boxes to find if it is a duplicate box
+        """
         x1 = max(box1[0], box2[0])
         y1 = max(box1[1], box2[1])
         x2 = min(box1[2], box2[2])
@@ -93,6 +106,9 @@ class GroundingDINO:
         return iou
 
     def calculate_ioa(self, box1, box2):
+        """
+        Calculate the  IoA (Area) between boxes to find if it is a duplicate box
+        """
         x1 = max(box1[0], box2[0])
         y1 = max(box1[1], box2[1])
         x2 = min(box1[2], box2[2])
@@ -110,7 +126,11 @@ class GroundingDINO:
 
         return ioa
     
-    def get_garment_conflict(self, box_dict):
+    def get_garment_conflict(self, box_dict, overlapping_area_threshold, overlapping_perc_threshold):
+        """
+        This method filters the overlapping boxes for mutually exclusive garments. Like Skirt and dress, Skirt and pants, dress and top.
+        It takes the IoU and IoA to see if it is matching the threshold then it considers it duplicates and drops the duplicate box and keeps the first one 
+        """
         box_dict_copy = box_dict.copy()
         keys = list(box_dict_copy.keys())
         if "dress" in keys:
@@ -121,7 +141,7 @@ class GroundingDINO:
             keys = list(box_dict_copy.keys())
         
         keys = list(box_dict_copy.keys())
-        print(f"keys updated {keys}")
+        # print(f"keys updated {keys}")
         
         for item1, item2 in MUTUALLY_EXCLUSIVE_GARMENTS:
             print(f"in loop {item1}, {item2}")
@@ -133,22 +153,25 @@ class GroundingDINO:
                 if box1 and box2:
                     overlapping_perc = self.calculate_iou(box1[0], box2[0])
                     overlapping_area = self.calculate_ioa(box1[0], box2[0])
-                    print(item1, item2)
-                    print(overlapping_perc)
-                    print(overlapping_area)
+                    # print(item1, item2)
+                    # print(overlapping_perc)
+                    # print(overlapping_area)
 
-                    if overlapping_perc > 0.90 and overlapping_area > 0.90:
+                    if overlapping_perc > overlapping_perc_threshold and overlapping_area > overlapping_area_threshold:
                         del box_dict_copy[item2]
                         keys = list(box_dict_copy.keys())
-        print(box_dict_copy)
+        # print(box_dict_copy)
 
         return box_dict_copy
     
     def execute_dino_pipeline(self, image_obj, separator, save=False, basename="",pipeline_name="PIPELINE_C"):
+        """
+        This is used as main method to run full pipeline. 
+        """
 
         current_pipeline = PipelineConfig[pipeline_name]
                 
-        boxes, labels = self.get_obj_boxes(image_obj=image_obj, text_prompt=DINO_PROMPT)
+        boxes, labels = self.get_obj_boxes(image_obj=image_obj, text_prompt=DINO_PROMPT, box_threshold=self.box_threshold, text_threshold=self.text_threshold)
 
         discovered_boxes = {}
         EXPECTED_CLASSES = [c.strip() for c in DINO_PROMPT.split(".")]
@@ -181,7 +204,7 @@ class GroundingDINO:
                 normalized_boxes[key] = []
             normalized_boxes[key].extend(boxes)
 
-        clean_boxes = self.get_garment_conflict(box_dict=normalized_boxes)
+        clean_boxes = self.get_garment_conflict(box_dict=normalized_boxes, overlapping_perc_threshold=0.9, overlapping_area_threshold=0.9)
 
         extracted_items = {}
 
@@ -230,18 +253,21 @@ class GroundingDINO:
                     h,w
                 )
 
+                if category == "bag":
+                    category = "bag_wallet"
+
                 extracted_items[category] = {
                     "seg_crop": final_crop_pil,
                     "full_dim": full_dim_pil,
                     "eval_mask": eval_mask_pil,
-                    "dino_box": union_box,
+                    "dino_box": best_boxes,
                     "metadata": metadata
                     }
 
                 if save:
                     self.save_segments(img_pil=final_crop_pil, save_dir=current_pipeline.seg_dir, basename=basename, group_name=category)
                     self.save_segments(img_pil=full_dim_pil, save_dir=current_pipeline.full_dim_dir, basename=basename, group_name=category)
-                    self.save_segments(img_pil=eval_mask_pil, save_dir=current_pipeline.eval_dir,basename=basename, group_name=category+"+mask")
+                    self.save_segments(img_pil=eval_mask_pil, save_dir=current_pipeline.eval_dir,basename=basename, group_name=category+"_mask")
                     bbox_data = {
                         "class_name": category,
                         "box_coordinates": extracted_items[category]["dino_box"],
@@ -261,3 +287,51 @@ class GroundingDINO:
         save_path = os.path.join(save_dir, f"{basename}_{group_name}.png")
 
         img_pil.save(save_path)
+
+    def get_evaluate_boxes(self, image_obj, box_threshold, text_threshold, iou_threshold, area_threshold):
+        """
+        This method same as the main method but without SAM. This output the boxes that is used to evaluate and tune the thresholds
+        """
+        boxes, labels = self.get_obj_boxes(image_obj=image_obj, text_prompt=DINO_PROMPT, box_threshold=box_threshold, text_threshold=text_threshold)
+
+        discovered_boxes = {}
+        EXPECTED_CLASSES = [c.strip() for c in DINO_PROMPT.split(".")]
+        # print(EXPECTED_CLASSES)
+
+        for box, label in zip(boxes, labels):
+            clean_label = label.lower().strip()
+            if not clean_label == "":
+                if clean_label not in EXPECTED_CLASSES:
+                    matched_classes = [cat for cat in EXPECTED_CLASSES if cat in clean_label]
+                    if matched_classes:
+                        clean_label = matched_classes[0]
+                    else:
+                        continue
+                if clean_label not in discovered_boxes:
+                    discovered_boxes[clean_label] = []
+                discovered_boxes[clean_label].append(box)
+
+
+        normalized_boxes = {}
+        for label, boxes in discovered_boxes.items():
+            if label in ["tshirt", "tank top", "blouse", "sweater", "offshoulder top"]:
+                key = "top"
+            elif label in ["jacket", "coat"]:
+                key = "outer_top"
+            else:
+                key = label
+            
+            if key not in normalized_boxes:
+                normalized_boxes[key] = []
+            normalized_boxes[key].extend(boxes)
+
+        clean_boxes = self.get_garment_conflict(box_dict=normalized_boxes, overlapping_perc_threshold=iou_threshold, overlapping_area_threshold=area_threshold)
+
+        extracted_items = {}
+
+        for category, box_list in clean_boxes.items():
+            best_boxes = self.filter_items(boxes=box_list, category=category)
+            if best_boxes:
+                extracted_items[category] = best_boxes
+
+        return extracted_items

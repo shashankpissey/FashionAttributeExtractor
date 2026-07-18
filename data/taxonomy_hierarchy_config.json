@@ -1,0 +1,147 @@
+{
+    "TAXONOMY_RULES": {
+    "upper_body": { 
+        "is_hierarchical": true,
+        "routing_attribute": "base_style",
+        "routing_candidates": ["top", "outer_top"],
+        "sub_styles": {
+            "top": {
+                "item_type": ["t_shirt", "polo_shirt", "bodysuit", "tank_top", "camisole", "bandeau", "blouse", "button_down_shirt", "cardigan", "crop_top", "top", "sweater_jumper", "peplum", "sweatshirt"],
+                "closure_mode": ["zip", "button", "tie", "pull_on", "snap"],
+                "drape": ["structured", "soft", "fluid", "crisp"],
+                "print_type": ["geometric", "abstract", "floral", "stripe", "animal", "graphic", "novelty", "embroidery_led", "polka_dots", "plain", "plaid"],
+                "sleeve_length": ["sleeveless", "short", "elbow", "three_quarter", "long"],
+                "sleeve_volume": ["regular", "puff", "balloon", "oversized", "slim", "wide", "no_sleeve"],
+                "neckline": ["collared", "crew", "halter", "high_neck", "off_shoulder", "scoop", "v_neck", "square", "strapless", "turtleneck", "one_shoulder", "sweetheart"],
+                "length": ["cropped", "hip_length", "longline", "waist_length", "full_length"],
+                "silhouette": ["body_skimming","boxy","fitted","oversized","relaxed","slim","straight"],
+                "opacity_level": ["opaque", "sheer", "semi_sheer"],
+                "texture": ["smooth", "textured", "highly_textured"],
+                "pattern_scale": ["small", "large", "medium", "none"],
+                "visual_weight": ["light","medium","heavy"]      
+            },
+            "outer_top": {
+                "item_type": ["jacket", "coat", "blazer", "parka_coat", "trench_coat", "puffer","sweater_jumper", "sweatshirt", "hoodie", "cardigan", "poncho", "waistcoat_vest"],
+                "closure_mode": ["zip", "button", "tie", "pull_on", "snap"],
+                "drape": ["structured", "soft", "fluid", "crisp"],
+                "print_type": ["geometric", "abstract", "floral", "stripe", "animal", "graphic", "novelty", "embroidery_led", "polka_dots", "plain", "plaid"],
+                "sleeve_length": ["sleeveless", "short", "elbow", "three_quarter", "long"],
+                "sleeve_volume": ["regular", "puff", "balloon", "oversized", "slim", "wide", "no_sleeve"],
+                "neckline": ["collared", "crew", "halter", "high_neck", "off_shoulder", "scoop", "v_neck", "square", "strapless", "turtleneck", "one_shoulder", "sweetheart"],
+                "length": ["cropped", "hip_length", "longline", "waist_length", "full_length"],
+                "silhouette": ["body_skimming","boxy","fitted","oversized","relaxed","slim","straight"],
+                "opacity_level": ["opaque", "sheer", "semi_sheer"],
+                "texture": ["smooth", "textured", "highly_textured"],
+                "pattern_scale": ["small", "large", "medium", "none"],
+                "visual_weight": ["light","medium","heavy"]
+            }
+        }
+    },
+    "dress": { 
+        "is_hierarchical": true,
+        "routing_attribute": "base_style",
+        "routing_candidates": ["dress", "all-in-one"],
+        "sub_styles": {
+            "dress": {
+                "cut": ["wrap","asymmetric", "pleated","standard","tiered", "circle","pencil"],
+                "print_type": ["geometric", "abstract", "floral", "stripe", "animal", "graphic", "novelty", "embroidery_led", "polka_dots", "plaid", "plain"],
+                "opacity_level": ["opaque", "sheer", "semi_sheer"],
+                "pattern_scale": ["small", "large", "medium", "none"],
+                "sleeve_length": ["sleeveless", "short", "elbow", "three_quarter", "long"],
+                "sleeve_volume": ["regular", "puff", "balloon", "oversized", "slim", "wide", "no_sleeve", "flared"],
+                "neckline": ["collared", "crew", "halter", "high_neck", "off_shoulder", "scoop", "v_neck", "square", "strapless", "turtleneck", "one_shoulder", "sweetheart", "boat"],
+                "visual_weight": ["light","medium","heavy"],
+                "silhouette": ["a_line", "fitted", "straight", "flared","relaxed"],
+                "waist_definition": ["cinched_waist", "structured_waist", "soft_waist", "none_waist"],
+                "length": ["mini", "midi", "maxi"],
+                "formality_band": ["casual", "smart_casual","occasion", "polished"],
+                "seasonality": ["all_season","cold_season", "warm_season"],
+                "material": ["cotton", "denim", "satin", "silk", "leather","velvet", "chiffon", "linen", "rayon", "nylon", "polyester", "suede", "georgette", "knit", "wool", "jersey", "lace", "mesh"],
+                "closure_mode": ["zip", "button", "tie", "pull_on"],
+                "item_type": ["mini dress", "maxi dress", "midi dress", "tiered dress", "pleated dress", "wrap dress","pencil dress"]
+            },
+            "all-in-one": {
+                "leg_shape": ["slim","tapered","wide","straight","flared","oversized"],
+                "rise": ["low_rise", "mid_rise", "high_rise"],
+                "closure_mode": ["zip", "button", "tie", "pull_on"],
+                "print_type": ["geometric", "abstract", "floral", "stripe", "animal", "graphic", "novelty", "embroidery_led", "polka_dots", "plaid", "plain"],
+                "opacity_level": ["opaque", "sheer", "semi_sheer"],
+                "pattern_scale": ["small", "large", "medium", "none"],
+                "sleeve_length": ["sleeveless", "short", "elbow", "three_quarter", "long"],
+                "sleeve_volume": ["regular", "puff", "balloon", "oversized", "slim", "wide", "no_sleeve", "flared"],
+                "visual_weight": ["light","medium","heavy"],
+                "silhouette": ["a_line", "fitted", "straight", "flared","relaxed"],
+                "waist_definition": ["cinched_waist", "structured_waist", "soft_waist", "none_waist"],
+                "neckline": ["collared", "crew", "halter", "high_neck", "off_shoulder", "scoop", "v_neck", "square", "strapless", "turtleneck", "one_shoulder", "sweetheart", "boat"],
+                "length": ["full_length", "ankle_length", "mid_calf", "mini"],
+                "formality_band": ["casual", "smart_casual","occasion", "polished"],
+                "seasonality": ["all_season","cold_season", "warm_season"],
+                "material": ["cotton", "denim", "satin", "silk", "leather","velvet", "chiffon", "linen", "rayon", "nylon", "polyester", "suede", "georgette", "knit", "wool", "jersey", "lace", "mesh"],
+                "item_type": ["jumpsuit", "playsuit", "romper", "dungaree"]
+            }
+        }
+    },
+    "skirt": {
+        "is_hierarchical": false,
+        "attributes": {
+            "length": ["mini", "midi", "maxi"],
+            "silhouette": ["a_line", "fitted", "straight"],
+            "cut": ["wrap","asymmetric", "pleated","standard","tiered", "circle","pencil"],
+            "print_type": ["geometric", "abstract", "floral", "stripe", "animal", "graphic", "novelty", "embroidery_led", "polka_dots", "plaid", "plain"],
+            "closure_mode": ["zip", "button", "tie", "pull_on"],
+            "waist_definition": ["cinched_waist", "structured_waist", "soft_waist", "none_waist"],
+            "item_type": ["mini skirt", "maxi skirt", "midi skirt", "tiered skirt", "pleated skirt", "wrap skirt","pencil skirt"]
+        }
+    },
+    "pants": {
+        "is_hierarchical": true,
+        "routing_attribute": "base_style",
+        "routing_candidates": ["jeans", "trousers", "shorts"],
+        "sub_styles": {
+            "jeans": {
+                "length": ["full_length", "ankle_length"],
+                "leg_shape": ["slim","tapered","wide","straight","flared","oversized"],
+                "item_type": ["wide-leg", "straight-leg", "low-rise", "tapered-leg", "high-rise"],
+                "silhouette": ["slim", "straight", "relaxed", "oversized", "flared"],
+                "closure_mode": ["zip","button"],
+                "waist_definition": ["cinched_waist", "none_waist", "structured_waist", "soft_waist"],
+                "print_type": ["geometric", "abstract", "floral", "stripe", "animal", "graphic", "novelty", "embroidery_led", "polka_dots", "plaid", "plain"]
+            },
+            "trousers": {
+                "length": ["full_length", "ankle_length", "mid_calf"],
+                "leg_shape": ["slim", "straight", "tapered", "wide", "flared","oversized"],
+                "silhouette": ["flared","straight", "relaxed","fitted"],
+                "closure_mode": ["zip", "button", "tie", "elastic"],
+                "waist_definition": ["cinched_waist", "none_waist", "structured_waist", "soft_waist"],
+                "print_type": ["geometric", "abstract", "floral", "stripe", "animal", "graphic", "novelty", "embroidery_led", "polka_dots", "plaid", "plain"],
+                "item_type": ["wide-leg", "straight-leg", "skinny", "culottes"]
+            },
+            "shorts": {
+                "length": ["above_knee","knee","mini","mid-thigh"],
+                "leg_shape": ["slim", "straight", "wide"],
+                "item_type": ["bermuda", "board", "cycling", "running", "cargo", "chino", "skorts", "hot_pants", "tailored","culottes", "denim"],
+                "silhouette": ["flared","straight", "relaxed","fitted","slim"],
+                "closure_mode": ["zip", "button", "tie", "elastic"],
+                "waist_definition": ["cinched_waist", "none_waist", "structured_waist", "soft_waist"],
+                "print_type": ["geometric", "abstract", "floral", "stripe", "animal", "graphic", "novelty", "embroidery_led", "polka_dots", "plaid", "plain"]
+            }
+        }
+    },
+    "bag_wallet":{
+        "is_hierarchical": false,
+        "attributes":{
+            "item_type": ["hobo","clutch","mini","shoulder","crossbody","top-handle","bucket","bag"],
+            "closure_mode": ["snap", "zip", "button"],
+            "material": ["denim", "leather","knit", "rubber", "cotton", "nylon", "velvet", "plastic"]
+        }
+    },
+    "shoes":{
+        "is_hierarchical": false,
+        "attributes":{
+            "item_type": ["sandals","mules","flats","boots","sliders","sneakers","heels","shoes","wedges","platform","pumps","Loafers","slingback","sneaker", "platform"],
+            "material": ["suede", "leather","canvas/cotton", "knit/mesh", "plastic", "wood"],
+            "closure_mode": ["lace", "straps", "slip-on", "buckle", "zipper"]
+        }
+    }
+}
+}
