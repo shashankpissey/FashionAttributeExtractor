@@ -1,0 +1,25 @@
+{
+    "PROMPT_TEMPLATES": {
+        "length": "a photo of a {candidate} length {category}",
+        "silhouette": "a photo of a {candidate} silhouette {category}",
+        "rise": "a photo of a {candidate} {category}",
+        "drape": "a photo of a {category} with a {candidate} drape",
+        "print_type": "a photo of a {category} with a {candidate} print",
+        "pattern_scale": "a photo of a {category} with a {candidate} scale pattern",
+        "formality_band": "a photo of a {candidate} style {category}",
+        "texture": "a photo of a {category} having a {candidate}",
+        "cut": "a photo of a {candidate} cut {category}",
+        "opacity_level": "a photo of a {candidate} {category}",
+        "waist_definition": "a photo of a {candidate} waist {category}",   
+        "closure_mode": "a photo of a {category} having a closure mode as  {candidate}",
+        "visual_weight": "a photo of a visually {candidate} weight {category}",
+        "sleeve_length": "a photo of a {category} with {candidate} sleeves",
+        "sleeve_volume": "a photo of a {category} with {candidate} sleeves",
+        "neckline": "a photo of a {category} with a {candidate} neckline",
+        "fit": "a photo of a {candidate} fit {category}",
+        "seasonality": "a photo of {category} that {candidate}",
+        "item_type": "a photo of a {category} of type {candidate}",
+        "material": "a photo of a {category} made of {candidate} fabric material",
+        "default": "an isolated shot of a {candidate} {category}"
+    }
+}

@@ -14,18 +14,24 @@ from utils.calculate_conf import calculate_conf_metadata
 logger = get_logger(__name__)
 
 class Segmenter(BaseSegformer):
+    
+    # Class to run the Segformer
 
     def __init__(self, model, device):
         
         super().__init__(model=model, device=device)
 
-    def extract_seg(self, image_obj, separator, box, ex_box, conf_threshold=0.2, min_px=500, save=False, basename="", pipeline_name="PIPELINE_B"):
+    def extract_seg(self, image_obj, separator, conf_threshold=0.2, min_px=500, save=False, basename="", pipeline_name="PIPELINE_B"):
+        """
+        Main method to extract the garments using segformer-b2-clothes
+        """
         try:
+            logger.info(f"conf_threshold is {conf_threshold}")
             min_px = int(min_px)
             conf_threshold = float(conf_threshold)
             current_pipeline = PipelineConfig[pipeline_name]
             image = Image.fromarray(image_obj)
-            
+            # Code similar to hugging face to draw the inference
             inputs = self.seg_processor(images=image, return_tensors="pt").to(self.device)
 
             with torch.inference_mode(), torch.autocast(device_type=self.device.type):
@@ -43,17 +49,8 @@ class Segmenter(BaseSegformer):
                 raw_segmentation = probability.argmax(dim=1)[0]
                 confidence_map = probability.max(dim=1)[0][0]
 
-            local_x1 = max(0, int(box[0] - ex_box[0]))
-            local_y1 = max(0, int(box[1] - ex_box[1]))
-            local_x2 = min(raw_segmentation.shape[1], int(box[2] - ex_box[0]))
-            local_y2 = min(raw_segmentation.shape[0], int(box[3] - ex_box[1]))
-            
-            boundary_constraint = torch.zeros_like(raw_segmentation, dtype=torch.bool, device=self.device)
-            boundary_constraint[local_y1:local_y2, local_x1:local_x2] = True
-            
-            predicted_segmentation = torch.where(boundary_constraint, raw_segmentation, torch.tensor(0, device=self.device))
-
-            unique_classes, counts = torch.unique(predicted_segmentation, return_counts=True)
+            # Get the classes and its pixel counts
+            unique_classes, counts = torch.unique(raw_segmentation, return_counts=True)
             class_dict = dict(zip(unique_classes.cpu().numpy(), counts.cpu().numpy()))
             
             upper_pixels = class_dict.get(4, 0)
@@ -64,44 +61,18 @@ class Segmenter(BaseSegformer):
             total_clothing_pixels = upper_pixels + skirt_pixels + pants_pixels + dress_pixels
             GROUPS = {}
 
+            # min_px of 500 taken as basic requirement for any garment for the image size used in experimentation
             if total_clothing_pixels > min_px:
-                dress_ratio = dress_pixels / total_clothing_pixels
-                pants_ratio = pants_pixels / total_clothing_pixels
-                upper_ratio = upper_pixels / total_clothing_pixels
-
-                if dress_pixels > min_px and pants_pixels > min_px and dress_ratio > 0.15 and pants_ratio > 0.15:
-                    GROUPS["dress"] = [4, 6, 7]
-                    if skirt_pixels > min_px:
-                        GROUPS["dress"].append(5)
-                elif dress_pixels > min_px and dress_ratio > 0.20:
-                    GROUPS = {"dress": [7]} 
-                    if skirt_pixels > 0: 
-                        GROUPS["dress"].append(5)    
-                    if upper_pixels > 0 and upper_ratio < 0.25:
-                        GROUPS["dress"].append(4)
-                    else:
-                        if upper_pixels > min_px:
-                            GROUPS["upper"] = [4]
-                    if pants_pixels > min_px and pants_ratio > 0.20: 
-                        GROUPS["pants"] = [6]
-                else:
-                    if upper_pixels > min_px:
-                        GROUPS["upper"] = [4]
-                    if pants_pixels > min_px and skirt_pixels > min_px:
-                        pants_bottom_ratio = pants_pixels / (pants_pixels + skirt_pixels)
-                        if pants_bottom_ratio > 0.15: 
-                            GROUPS["pants"] = [5, 6]
-                        else:
-                            GROUPS["skirt"] = [5, 6]
-                    elif pants_pixels > min_px:
-                        GROUPS["pants"] = [6]
-                        
-                    elif skirt_pixels > min_px:
-                        GROUPS["skirt"] = [5]
+                # Group each to the respective coarse groups
+                GROUPS["dress"] = [7]
+                GROUPS["skirt"] = [5]
+                GROUPS["pants"] = [6]
+                GROUPS["upper"] = [4]
                 GROUPS["shoes"] = [9, 10]
                 GROUPS["sunglasses"] = [3]
 
             raw_seg_cpu = raw_segmentation.cpu().numpy()
+            # Context providing masks for body parts
             face_mask = np.isin(raw_seg_cpu, [11,2,1,3])
             arms_mask = np.isin(raw_seg_cpu, [14, 15])
             legs_mask = np.isin(raw_seg_cpu, [12, 13])
@@ -110,10 +81,12 @@ class Segmenter(BaseSegformer):
             extracted_items = {}
             
             for group_name, class_ids in GROUPS.items():
+                # for each group run the obtaines mask and finally save the mask  
                 class_tensor = torch.tensor(class_ids, device=self.device)
-                gpu_mask = torch.isin(predicted_segmentation, class_tensor) & (confidence_map > conf_threshold)
+                gpu_mask = torch.isin(raw_segmentation, class_tensor) & (confidence_map > conf_threshold)
                 
                 mask = gpu_mask.cpu().numpy()
+                # for accessories a reduced min pixel is used as they occupy smaller. This was chosen on heuristics as a basic requirement based on the image size used in experimentation
                 min_pixels = 100 if group_name in ["shoes", "sunglasses"] else min_px
 
                 if mask.sum() < min_pixels:
@@ -123,6 +96,7 @@ class Segmenter(BaseSegformer):
                 if coords.size == 0:
                     continue
 
+                # If there are multiple small blobs continue without saving the mask as it is FP and small fragmented masks can provide no real value to prediction
                 mask_uint8 = (mask * 255).astype(np.uint8)
                 num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(mask_uint8, connectivity=8)
 
@@ -153,6 +127,7 @@ class Segmenter(BaseSegformer):
                 tight_crop_pil = Image.fromarray(full_rgba[y0:y1, x0:x1], mode="RGBA")
 
                 if group_name in ["upper", "dress"]:
+                    # This loop uses yolos to separate the top and outer top as segformer used for experimentation does not have separation. 
                     key = "top" if group_name == "upper" else "dress"
                     context = [face_mask, arms_mask] if group_name == "upper" else [face_mask, arms_mask, legs_mask, shoes_mask]
                     
@@ -160,6 +135,7 @@ class Segmenter(BaseSegformer):
                     
                     if not upper_group or (len(upper_group) == 1 and key in upper_group):
                         
+                        # If there was no separation then just save mask from segformer
                         metadata = calculate_conf_metadata(clean_mask_uint8, [int(x0), int(y0), int(x1), int(y1)], h, w)
                         metadata["bbox"] = [int(x0), int(y0), int(x1), int(y1)]
 
@@ -173,6 +149,7 @@ class Segmenter(BaseSegformer):
                             "eval_mask": eval_mask_pil,
                             "metadata": metadata}
                     else:
+                        # If multiple layers found then loop them and save separate masks for them
                         for layer_name, layer_data in upper_group.items():
                             if isinstance(layer_data, dict):
                                 layer_pil = layer_data["image"]
@@ -210,6 +187,7 @@ class Segmenter(BaseSegformer):
                             "metadata": metadata
                             }
                 else:
+                    # For all other except top save the masks as is from segformer
                     metadata = calculate_conf_metadata(clean_mask_uint8.astype(np.uint8), [int(x0), int(y0), int(x1), int(y1)], h, w)
                     metadata["bbox"] = [int(x0), int(y0), int(x1), int(y1)]
                     context = []
@@ -266,6 +244,7 @@ class Segmenter(BaseSegformer):
 
     def create_dim_external_mask(self, image_obj, target_mask, context_masks=None, opacity=0.25):
 
+        # Used to create the mask highlighted and context dimmed. 
         h, w = image_obj.shape[:2]
         alpha_mask = np.zeros((h,w), dtype=np.uint8)
         if context_masks:
@@ -284,6 +263,7 @@ class Segmenter(BaseSegformer):
         return output
 
     def create_full_dim(self, image_obj, target_mask, opacity=0.25):
+        # Similar to the prevoious but this is on whole image
         h, w = image_obj.shape[:2]
         alpha_mask = np.full((h,w), int(opacity * 255), dtype=np.uint8)
         alpha_mask[target_mask] = 255

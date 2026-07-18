@@ -1,0 +1,59 @@
+{
+    "PROMPT_DESCRIPTION": {
+        "outer_top": "heavy winter coat or jacket",
+        "top": "lightweight shirt or blouse",
+        "t_shirt": "t-shirt",
+        "sweater_jumper": "thick knitted sweater",
+        "button_down_shirt": "button-down collared shirt",
+        "sweatpants_joggers": "sweatpants",
+        "dress": "a one-piece dress", 
+        "all-in-one": "a one-piece jumpsuit or romper or playsuit",
+        
+        "body_skimming": "tight form-fitting",
+        "boxy": "straight blocky shape",
+        "oversized": "baggy oversized",
+        "barrel_balloon": "curved balloon",
+        "plain": "solid plain color", 
+        "graphic": "large graphic logo",
+        "embroidery_led": "fabric embroidery as print",
+        "smart_casual": "office wear",
+        "occasion": "formal evening wear",
+        "all_season": "can be worn across all seasons throughout the year",
+        "transitional_season": "can be worn during transitional_season",
+        "cold_season": "can be worn heavy winter clothing",
+        "warm_season": "can be worn light summer clothing",
+        "pull_on": "an elasticated to wear garment",
+        "zip": "a zip to wear garment",
+        "button": "a button to wear garment",
+        "tie": "a lace to tie to wear garment",
+
+        "structured": "rigid and structured fabric",
+        "crisp": "crisp and stiff fabric",
+        "fluid": "fluid, flowing fabric",
+        "soft": "soft fabric",
+
+        "cinched_waist": "clothing is pulled inward at waist using belt, drawstring",
+        "none_waist": "Clear waist with no belt, structured pattern seen or no waist line visible",
+        "structured_waist": "clear shaped waist definition found",
+        "soft_waist": "loose elastic fabric waist definition found",
+
+        "smooth": "that has a smooth texture fabric",
+        "textured": "that has less texture fabric", 
+        "highly_textured": "that has very high textured fabric",
+
+        "flared": "fitted at waist and thigh and widens outward creating bell shaped",
+        "straight":"consistent straight line from waist to end of garment",
+        "relaxed": "loose fit and gap",
+        "fitted":"tightly fitted tracing body shape",
+        "slim":"narrow fit",
+
+        "full_length": "a full length that flows upto feet",
+        "ankle_length": "garment till ankle",
+        "mid_calf": "garment that is above-ankle and below-knee",
+
+        "cropped": "crop_top which ends high above",
+        "hip_length": "garment that ends just above hips",
+        "longline": "garment ending below the hips",
+        "waist_length": "garment ending at waist"
+    }
+}
