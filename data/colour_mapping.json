@@ -1,0 +1,5 @@
+{
+    "PARENT_COLOUR_MAP" : { 
+    "light blue":"blue", "dark blue":"blue", "navy":"blue","turquoise":"blue", "teal":"blue", "blue": "blue", "green":"green", "light green":"green", "dark green":"green", "sage green": "green", "olive":"green", "olive green":"green", "lime":"green", "khaki":"green", "red": "red", "burgundy":"red", "maroon": "red", "rust": "red", "pink":"pink", "peach":"pink", "lavender":"purple", "purple":"purple", "orange": "orange", "gold":"yellow", "yellow":"yellow", "light yellow": "yellow", "brown":"brown","dark brown": "brown", "light brown":"brown", "tan":"brown", "beige":"beige","cream":"beige", "black":"black", "white":"white","clear":"white", "grey":"grey","light grey": "grey", "dark grey": "grey","silver":"grey"
+}
+}

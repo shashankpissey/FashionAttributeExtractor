@@ -55,5 +55,6 @@ ATTRIBUTE_MAPPING = {
     "predicted_visual_weight": "tags.visual_weight",
     "predicted_item_type": "item_type_x",
     "predicted_leg_shape": "tags.leg_shape",
-    "predicted_material": "tags.material"
+    "predicted_material": "tags.material",
+    "predicted_colour": "tags.primary_color"
 }

@@ -191,7 +191,7 @@ class Evaluate_attribute_metrics:
             "category": "Overall (weighted) metric",
             "precision": weighted_precision,
             "recall": weighted_recall,
-            "f1-score": 2 * weighted_precision * weighted_recall / (weighted_precision + weighted_recall) if (weighted_precision + weighted_recall) > 0 else 1.0,
+            "f1-score": class_report["weighted avg"]["f1-score"],
             "support": per_class_report["support"].sum()
         }]).set_index("category")
 
@@ -233,12 +233,12 @@ class Evaluate_attribute_metrics:
                 y_true_attr = category_dataframe[true_col].apply(self.force_clean_string)
                 print(y_true_attr.unique())
                 print(y_pred_attr.unique())
-                print(type(y_true))
+                # print(type(y_true))
 				    
                 if len(y_true_attr[y_true_attr != "missing"]) == 0:
                     continue
 
-                if len(y_true) > 0:
+                if len(y_true_attr) > 0:
                     report = classification_report(
                         y_true=y_true_attr,
                         y_pred=y_pred_attr,
@@ -280,5 +280,3 @@ class Evaluate_attribute_metrics:
             cols = ["category", "attribute", "accuracy", "macro_precision", "macro_recall", "macro_f1","weighted_precision","weighted_recall","weighted_f1","support"]
             summary_df = summary_df[cols].round(4)
             summary_df.to_csv(f"{save_path}{segment_type}_summary_metrics.csv", index=False)
-
-        
