@@ -97,33 +97,20 @@ PIPELINE_C_FULL_DIM_IMAGES = "D:/Dissertation/Test/Data/Segmented_Files/Final_Se
 CLIP_PROMPT="E:/Masters/Dissertation/Code/Dissertation/FashionAttributeExtractor/data/prompt.json"
 PROMPT_DESCRIPTION="E:/Masters/Dissertation/Code/Dissertation/FashionAttributeExtractor/data/prompt_description.json"
 TAXONOMY_HIERARCHY="E:/Masters/Dissertation/Code/Dissertation/FashionAttributeExtractor/data/taxonomy_hierarchy_config.json"
+COLOUR_MAPPING="E:/Masters/Dissertation/Code/Dissertation/FashionAttributeExtractor/data/colour_mapping.json"
 
 
-GT_LOCATION = "D:/Dissertation/Test/Data/Segmented_Files/Validation/Baseline_final.csv"
+GT_LOCATION = "D:/Dissertation/Test/Data/Segmented_Files/Validation/Baseline_f.csv"
 
 
 # Color
 
-# GT_COLOR_NAMES = [
-#     'cream', 'gold', 'white', 'brown', 'beige', 'black', 'red', 'blue',
-#     'dark brown', 'light blue', 'grey', 'green', 'orange', 'light green',
-#     'peach', 'navy', 'dark blue', 'turquoise', 'tan', 'khaki',
-#     'light grey', 'burgundy', 'dark green', 'sage green', 'pink', 'olive',
-#     'lavender', 'silver', 'light brown', 'purple', 'maroon', 'lime',
-#     'olive green', 'light yellow', 'yellow', 'rust', 'dark grey', 'teal',
-#     'clear'
-# ]
-
-GT_COLOR_NAMES = [
-        'white', 'black', 'grey', 'silver',
-        'blue', 'navy', 'turquoise',
-        'red', 'burgundy',
-        'green', 'khaki',
-        'yellow', 'gold', 'orange',
-        'pink', 'peach', 'purple',
-        'brown', 'tan', 'beige', 'cream'
-    ]
-
-PARENT_COLOR_MAP = { 
-    'light blue':'blue', 'dark blue':'blue', 'navy':'blue','turquoise':'blue', 'teal':'blue', 'blue': 'blue', 'green':'green', 'light green':'green', 'dark green':'green', 'sage green': 'green', 'olive':'green', 'olive green':'green', 'lime':'green', 'khaki':'green', 'red': 'red', 'burgundy':'red', 'maroon': 'red', 'rust': 'red', 'pink':'pink', 'peach':'pink', 'lavender':'purple', 'purple':'purple', 'orange': 'orange', 'gold':'yellow', 'yellow':'yellow', 'light yellow': 'yellow', 'brown':'brown','dark brown': 'brown', 'light brown':'brown', 'tan':'brown', 'beige':'beige','cream':'beige', 'black':'black', 'white':'white','clear':'white', 'grey':'grey','light grey': 'grey', 'dark grey': 'grey','silver':'grey'
-}
+GT_COLOUR_NAMES = [
+    'cream', 'gold', 'white', 'brown', 'beige', 'black', 'red', 'blue',
+    'dark brown', 'light blue', 'grey', 'green', 'orange', 'light green',
+    'peach', 'navy', 'dark blue', 'turquoise', 'tan', 'khaki',
+    'light grey', 'burgundy', 'dark green', 'sage green', 'pink', 
+    'lavender', 'silver', 'light brown', 'purple', 'maroon', 'lime',
+    'olive green', 'light yellow', 'yellow', 'rust', 'dark grey', 'teal',
+    'clear'
+]

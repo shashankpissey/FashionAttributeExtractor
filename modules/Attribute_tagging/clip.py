@@ -8,53 +8,12 @@ from PIL import Image
 from torch.utils.data import Dataset, DataLoader
 from transformers import CLIPModel, CLIPProcessor
 
-from config import CLIP_PROMPT, PROMPT_DESCRIPTION, TAXONOMY_HIERARCHY
+from modules.Attribute_tagging.color_tagging import ColourTagger
+from config import CLIP_PROMPT, PROMPT_DESCRIPTION, TAXONOMY_HIERARCHY, GT_COLOUR_NAMES
 from data.attributes_list import UNIVERSAL_ATTRIBUTES,UNIVERSAL_BOTTOM_ATTRIBUTES, UNIVERSAL_DRESS_ATTRIBUTES, UNIVERSAL_TOP_ATTRIBUTES
 from utils.log_config import get_logger
 
 logger = get_logger(__name__)
-
-class FashionDataset(Dataset):
-    """
-    This class is responsible for preprocessign os the files before sending them to the tagging by FashionCLIP and FashionSigLip
-    """
-    def __init__(self, image_paths):
-        self.image_paths = [str(p) for p in image_paths]
-        self.background_color = (255,255,255)
-    def __len__(self):
-        return len(self.image_paths)
-    
-    def __getitem__(self, idx):
-        """
-        This method is used to make sure the masks are in square format before sending to the CLIP as CLIP expects a square image (224X224). The method only pads to make the image square for the 224X224, it is left for CLIP to internally handle it.
-        """
-        img_path = self.image_paths[idx]
-        try:
-            image = Image.open(img_path).convert('RGB')
-            width, height = image.size
-            square_size = max(width, height)
-
-            new_img = Image.new("RGB", (square_size, square_size), self.background_color)
-            x_offset = (square_size - width) // 2
-            y_offset = (square_size - height) // 2
-
-            if image.mode == 'RGBA':
-                new_img.paste(image, (x_offset, y_offset), mask=image)
-            else:
-                new_img.paste(image, (x_offset, y_offset))
-
-            return new_img, Path(img_path).name
-        except Exception as e:
-            print(f"Error loading {img_path}: {e}")
-            return None, Path(img_path).name
-
-def collate_fn(batch):
-    # Merge the images into batches based on category
-    batch = [item for item in batch if item[0] is not None]
-    if not batch:
-        return [], []
-    images, names = zip(*batch)
-    return list(images), list(names)
 
 class CLIP_SigLip_Attribute_Extractor:
     """
@@ -62,7 +21,7 @@ class CLIP_SigLip_Attribute_Extractor:
 
     It starts from reading the different configurations for prompts, descriptions, taxonomies. Prepares the template and then maps the description for the prompts
     """
-    def __init__(self, device='cuda', model_name="SigLip", descriptive=True):
+    def __init__(self, device='cuda', model_name="SigLip", descriptive=True, colour_k=4):
         with open(CLIP_PROMPT, "r") as prompt_temp:
             config_prompt = json.load(prompt_temp)
         with open(PROMPT_DESCRIPTION, "r") as desc:
@@ -89,7 +48,34 @@ class CLIP_SigLip_Attribute_Extractor:
         self.model.eval()
         self.text_cache = {}
         self.model_name = model_name
+        self.colour_k = colour_k
+        self.colour_tagger = ColourTagger(GT_COLOUR_NAMES)
 
+    def prepare_image_batch(self, image_path, background_colour=(255, 255, 255)):
+        """
+        This method is used to prepare the image. The image is read in RGBA and then only opaque picsls are obtained. The CLIP resize is left for its internal resize but the total image is made square by padding white pixels to shortest side.
+        """
+        try:
+            image = Image.open(image_path).convert("RGBA")
+            width, height = image.size
+            square_size = max(width, height)
+
+            new_img = Image.new("RGB", (square_size, square_size), background_colour)
+            x_offset = (square_size - width) // 2
+            y_offset = (square_size - height) // 2
+            new_img.paste(image, (x_offset, y_offset), mask=image)
+            return new_img, image, Path(image_path).name
+        except Exception as e:
+            logger.error(f"Padding failed with error {e}")
+            return None, None, Path(image_path).name
+
+    def batch_iteration(self, paths, batch_size):
+        """
+        This is a generator function that provides images per batch size based
+        """
+        for i in range(0, len(paths), batch_size):
+            yield paths[i:i + batch_size]        
+    
     def group_imagesper_category(self, folder_path):
         """
         This method is used to group the images into categories based on the filename from segmentation
@@ -158,10 +144,17 @@ class CLIP_SigLip_Attribute_Extractor:
             logger.info(f"Processing {len(paths)} images for category: {mask_category}")
             config = self.TAXONOMY_RULES[mask_category]
             logger.info(config)
-            dataset = FashionDataset(paths)
-            dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False,collate_fn=collate_fn)
 
-            for images, names in dataloader:
+            for path_batch in self.batch_iteration(paths, batch_size):
+                images, original_images, names = [], [], []
+
+                for p in path_batch:
+                    padded_image, original_image, name = self.prepare_image_batch(p)
+                    if padded_image is not None:
+                        images.append(padded_image)
+                        original_images.append(original_image)
+                        names.append(name)
+                
                 if not images:
                     continue
 
@@ -181,6 +174,12 @@ class CLIP_SigLip_Attribute_Extractor:
                         image_features = image_features / image_features.norm(dim=-1, keepdim=True)
 
                 batch_records = {name: {"filename": name, "main_category": mask_category} for name in names}
+
+                for index, name in enumerate(names):
+                    colour_result = self.colour_tagger.extract_colours(original_images[index], self.colour_k)
+                    batch_records[name]["predicted_colour"] = colour_result["predicted_colour"]
+                    batch_records[name]["colour_percentage"] = colour_result["percentage"]
+                    batch_records[name]["colour_delta_e"] = colour_result["delta_e_distance"]
 
                 if mask_category in ("skirt", "jeans", "trousers", "shorts", "pants"):
                     attr = UNIVERSAL_BOTTOM_ATTRIBUTES
