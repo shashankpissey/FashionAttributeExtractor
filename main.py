@@ -10,6 +10,8 @@ from modules.DINO.DINO import GroundingDINO
 import modules.Segformer.segformer_factory as sf
 from utils.timer import timer
 from utils.log_config import get_logger
+from utils.create_folders import create_folders
+from tagging import tag
 
 
 logger = get_logger(__name__)
@@ -60,7 +62,7 @@ def extraction_driver(person_detector, segmenter_obj, separator, zero_shot_model
                             mask_list = separator.seg_only_obj_det(expanded_crop, "",save, basename=person_basename,pipeline_name = pipeline_name.upper())
                         elif pipeline_name.upper() == "PIPELINE_B":
                             print("Segmentation Started")
-                            mask_list = segmenter_obj.extract_seg(expanded_crop, separator, box=box, ex_box=expanded_box, save=save, basename=person_basename, pipeline_name = pipeline_name.upper())
+                            mask_list = segmenter_obj.extract_seg(expanded_crop, separator, save=save, basename=person_basename, pipeline_name = pipeline_name.upper())
                         elif pipeline_name.upper() == "PIPELINE_C":
                             print("Segmentation Started")
                             mask_list = zero_shot_model.execute_dino_pipeline(expanded_crop, separator, save=save, basename=person_basename,pipeline_name=pipeline_name.upper())
@@ -85,11 +87,11 @@ def execute_pipeline(pipeline_name):
     separator = ObjectsDetectorAndSeparate(OBJECT_DETECTOR_MODEL, device)
     groundedSAM = GroundingDINO(GROUNDING_DINO_MODEL, device)
     extraction_driver(person_detector=person_detector, segmenter_obj=segmenter_obj, separator=separator,zero_shot_model=groundedSAM, save=True, pipeline_name=pipeline_name)
-
-    
-
+    tag()
 
 if __name__ == "__main__":
     # for pipeline in ["PIPELINE_A", "PIPELINE_C"]:
-    for pipeline in ["PIPELINE_B"]:
+    create_folders()
+    for pipeline in ["PIPELINE_A"]:
         execute_pipeline(pipeline_name=pipeline)
+        
