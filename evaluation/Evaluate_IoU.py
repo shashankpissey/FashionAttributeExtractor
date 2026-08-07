@@ -15,7 +15,7 @@ class Evaluate_IoU:
     def __init__(self):
         self.eval_config = EvaluatePipeline()
 
-    def evaluate_pipeline_iou(self, coco, category, mask_dir, pipeline_name):
+    def evaluate_pipeline_iou(self, coco, category, mask_dir, pipeline_name, target_filenames):
         """
         This method is used to evaluate the IoU for segmentation
         It reads the COCO file merge the masks using logical or
@@ -24,7 +24,18 @@ class Evaluate_IoU:
         """
         results = []
 
-        for image_id in coco.getImgIds():
+        file_to_take = set(target_filenames)
+        img_ids = []
+        for img_id in coco.getImgIds():
+            filename = coco.loadImgs(img_id)[0]["file_name"]
+            if not filename.endswith("_p0.png"):
+                continue
+            if not filename in file_to_take:
+                continue
+            img_ids.append(img_id)
+        # img_ids = [img_id for img_id in coco.getImgIds() if coco.loadImgs(img_id)[0]["file_name"].endswith("_p0.png")]
+
+        for image_id in img_ids:
             image_file = coco.loadImgs(image_id)[0]
             filename = image_file["file_name"]
             filename_stem = Path(filename).stem
@@ -156,7 +167,7 @@ class Evaluate_IoU:
         macro_f1 = round(seg_f1_df["F1_IoU50"].mean(), 4)
         return seg_f1_df, macro_f1
 
-    def evaluate_pipeline(self):
+    def evaluate_pipeline(self, file_names):
         """
         This is used as a main method that runs through the different functions and finally creates separaate files along with a consolidated file
         """
@@ -174,7 +185,7 @@ class Evaluate_IoU:
             pipeline_name = pipeline.split()[0]
             mask_path = self.eval_config.PRED_MASK_PATH + "/" + pipeline_name + "/eval_images/"
 
-            iou_df = self.evaluate_pipeline_iou(coco, category_to_id, mask_path, pipeline_name)
+            iou_df = self.evaluate_pipeline_iou(coco, category_to_id, mask_path, pipeline_name, file_names)
             iou_df.to_csv(f"{self.eval_config.OUTPUT_DIR}per_image_iou_{pipeline_name}.csv", index=False)
 
             # Obtain the mean, median IoU and save

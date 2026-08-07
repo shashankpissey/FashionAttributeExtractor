@@ -3,13 +3,13 @@ from modules.Attribute_tagging.clip import CLIP_SigLip_Attribute_Extractor
 
 
 def tag():
-    for data_folder in [PIPELINE_B_SEG_IMAGES, PIPELINE_A_SEG_IMAGES, PIPELINE_C_SEG_IMAGES, PIPELINE_B_DIM_IMAGES, PIPELINE_B_FULL_DIM_IMAGES, PIPELINE_A_FULL_DIM_IMAGES, PIPELINE_C_FULL_DIM_IMAGES]:
+    for data_folder in [PIPELINE_B_SEG_IMAGES, PIPELINE_A_SEG_IMAGES, PIPELINE_C_SEG_IMAGES,PIPELINE_B_DIM_IMAGES, PIPELINE_B_FULL_DIM_IMAGES, PIPELINE_A_FULL_DIM_IMAGES, PIPELINE_C_FULL_DIM_IMAGES]:
             file_name_to_save = data_folder.split("/")[-2]
             print(file_name_to_save)
         
-            extractor = CLIP_SigLip_Attribute_Extractor(device='cuda', model_name="SigLip", descriptive=True)
+            extractor = CLIP_SigLip_Attribute_Extractor(device='cuda', model_name="CLIP", descriptive=True)
             
-            results_df = extractor.extract_attributes(data_folder, batch_size=32)
+            results_df = extractor.extract_attributes(data_folder, batch_size=32, file_name_to_save=file_name_to_save)
             
             output_path = data_folder+f"{file_name_to_save}_results.csv"
             results_df.to_csv(output_path, index=False)

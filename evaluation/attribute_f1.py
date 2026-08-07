@@ -225,7 +225,7 @@ class Evaluate_attribute_metrics:
                     if pred_col in ["predicted_sleeve_length", "predicted_sleeve_volume", "predicted_neckline"]:
                         continue
                 if category in ["bag_wallet", "shoes"]:
-                    if pred_col not in ["predicted_opacity_level", "predicted_closure_mode", "predicted_visual_weight", "predicted_item_type", "predicted_material"]:
+                    if pred_col not in ["predicted_opacity_level", "predicted_closure_mode", "predicted_visual_weight", "predicted_item_type", "predicted_material", "predicted_colour"]:
                         continue
 
 

@@ -36,6 +36,7 @@ class CLIP_SigLip_Attribute_Extractor:
             self.clip_vocal_mapping = {}
         self.TAXONOMY_RULES = config_hierarchy["TAXONOMY_RULES"]
         self.device = torch.device(device if torch.cuda.is_available() else 'cpu')
+        # Code similar to hugging face
         if model_name == "SigLip":
             self.model, _, self.preprocess_val = open_clip.create_model_and_transforms("hf-hub:Marqo/marqo-fashionSigLip")
             self.tokeniser = open_clip.get_tokenizer("hf-hub:Marqo/marqo-fashionSigLip")
@@ -128,7 +129,7 @@ class CLIP_SigLip_Attribute_Extractor:
         self.text_cache[cache_key] = features
         return features
     
-    def extract_attributes(self, folder_path, batch_size=32):
+    def extract_attributes(self, folder_path, batch_size=32, file_name_to_save=""):
         """
         This method is used to run as an end to end methodology.
         It starts to group the images based on category
@@ -175,11 +176,12 @@ class CLIP_SigLip_Attribute_Extractor:
 
                 batch_records = {name: {"filename": name, "main_category": mask_category} for name in names}
 
-                for index, name in enumerate(names):
-                    colour_result = self.colour_tagger.extract_colours(original_images[index], self.colour_k)
-                    batch_records[name]["predicted_colour"] = colour_result["predicted_colour"]
-                    batch_records[name]["colour_percentage"] = colour_result["percentage"]
-                    batch_records[name]["colour_delta_e"] = colour_result["delta_e_distance"]
+                if file_name_to_save in ["segmented_a","segmented_b","segmented_c"]:
+                    for index, name in enumerate(names):
+                        colour_result = self.colour_tagger.extract_colours(original_images[index], self.colour_k)
+                        batch_records[name]["predicted_colour"] = colour_result["predicted_colour"]
+                        batch_records[name]["colour_percentage"] = colour_result["percentage"]
+                        batch_records[name]["colour_delta_e"] = colour_result["delta_e_distance"]
 
                 if mask_category in ("skirt", "jeans", "trousers", "shorts", "pants"):
                     attr = UNIVERSAL_BOTTOM_ATTRIBUTES

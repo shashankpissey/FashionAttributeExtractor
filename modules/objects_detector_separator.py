@@ -261,7 +261,7 @@ class ObjectsDetectorAndSeparate:
                 
                 is_duplicate = False
                 for i, accepted in enumerate(valid_detections):
-                    # Find if it is a duplicate box if some box is overlapping same category for more than 75% consider it as duplicate and drop the one with lower score
+                    # Find if it is a duplicate box if box is overlapping for more than 75% consider it as duplicate and drop the one with lower score
                     if self.calculate_iou(box_coords, accepted["box"]) > 0.75:
                         is_duplicate = True
                         if score.item() > accepted["score"]:

@@ -48,19 +48,20 @@ MASK_FILE_NAMES = {
     "dress": "dress"
 }
 
-COCO_JSON_PATH = "D:/Dissertation/Test/Data/manual_tagging/Annotation_masks_details.json"
+COCO_JSON_PATH = "D:/Dissertation/Final/annotations_last.json"
 
-# PIPELINES = ["Pipeline_A (Closed Class Obj Detector + SAM)", "Pipeline_B (Segformer)", "Pipeline_C (Grounded SAM)"]
+# COCO_JSON_PATH = "D:/Dissertation/Test/Data/manual_tagging/Annotation_masks_details.json"
 
-PIPELINES = ["Pipeline_A (Yolos)", "Pipeline_B (Segformer)", "Pipeline_C (Grounding DINO)"]
 
-PRED_MASK_PATH = "D:/Dissertation/Test/Data/Segmented_Files/Final_Segmented_Files/"
+# PIPELINES = ["Pipeline_A (Yolos)", "Pipeline_B (Segformer Hybrid)", "Pipeline_C (Grounding DINO)"]
+PIPELINES = ["Pipeline_B (Segformer Hybrid)"]
+PRED_MASK_PATH = "D:/Dissertation/Final/Data/Segmented_Files/Final_Segmented_Files/"
 
 CLIPPREDICTION_CSV = []
 
 METADATA_DIRECTORY = []
 
-OUTPUT_DIR = "D:/Dissertation/Test/Data/Validation/results/"
+OUTPUT_DIR = "D:/Dissertation/Final/Data/Segmented_Files/results/"
 
 
 
@@ -106,7 +107,7 @@ TAXONOMY_HIERARCHY="E:/Masters/Dissertation/Code/Dissertation/FashionAttributeEx
 COLOUR_MAPPING="E:/Masters/Dissertation/Code/Dissertation/FashionAttributeExtractor/data/colour_mapping.json"
 
 
-GT_LOCATION = "D:/Dissertation/Test/Data/Segmented_Files/Validation/Baseline_f.csv"
+GT_LOCATION = "D:/Dissertation/Test/Data/Segmented_Files/Validation/Baseline_f1.csv"
 
 
 # Color

@@ -22,7 +22,7 @@ def colour_tagger():
             # count = 0
             results = []
             for i, filename in enumerate(image_files):
-                image = Image.open(os.path.join(data_folder, filename)).convert("RGB")
+                image = Image.open(os.path.join(data_folder, filename)).convert("RGBA")
                 result = colour_tuning.extract_colours(image, k)
                 results.append({
                     "filename":filename,

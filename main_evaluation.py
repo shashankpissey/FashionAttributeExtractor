@@ -1,6 +1,9 @@
 from evaluation.Evaluate_IoU import Evaluate_IoU
+import json
 
 
 if __name__ == "__main__":
     evaluate = Evaluate_IoU()
-    evaluate.evaluate_pipeline()
+    with open("D:/Dissertation/Final/tuning.json", "r") as f:
+          split_filenames = set(json.load(f))
+    evaluate.evaluate_pipeline(split_filenames)

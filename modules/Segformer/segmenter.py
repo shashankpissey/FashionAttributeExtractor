@@ -109,7 +109,7 @@ class Segmenter(BaseSegformer):
                         clean_mask_uint8[labels == i] = 255
                 if valid_blobs > 5:
                     print("In blob")
-                    print(f"{basename}: The '{group_name}' is too highly fragmented ({valid_blobs} patches) hence rejected.")
+                    logger.info(f"{basename}: The '{group_name}' is too highly fragmented ({valid_blobs} patches) hence rejected.")
                     continue
                 
                 coords = np.argwhere(clean_mask_uint8 > 0)

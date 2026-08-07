@@ -101,7 +101,7 @@
             "jeans": {
                 "length": ["full_length", "ankle_length"],
                 "leg_shape": ["slim","tapered","wide","straight","flared","oversized"],
-                "item_type": ["wide-leg", "straight-leg", "low-rise", "tapered-leg", "high-rise"],
+                "item_type": ["wide-leg", "straight-leg"],
                 "silhouette": ["slim", "straight", "relaxed", "oversized", "flared"],
                 "closure_mode": ["zip","button"],
                 "waist_definition": ["cinched_waist", "none_waist", "structured_waist", "soft_waist"],
