@@ -216,7 +216,7 @@ class Evaluate_attribute_metrics:
                 if pred_col not in category_dataframe.columns or true_col not in category_dataframe.columns:
                     continue 
 
-                if pred_col == "base_style":
+                if pred_col == "predicted_base_style":
                     continue
                 if category in ["top", "outer_top"]:
                     if pred_col in ["predicted_waist_definition", "predicted_rise", "predicted_leg_shape"]:

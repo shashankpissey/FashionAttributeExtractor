@@ -222,7 +222,7 @@ class ObjectsDetectorAndSeparate:
             h, w = image_obj.shape[:2]
             target_sizes = torch.tensor([[h, w]])
             results = self.obj_processor.post_process_object_detection(
-                outputs=obj_outputs, target_sizes=target_sizes)[0]
+                outputs=obj_outputs, target_sizes=target_sizes, threshold=0.30)[0]
 
             upper_classes = [0, 1] 
             outer_classes = [2, 3, 4, 5, 9, 12]                   

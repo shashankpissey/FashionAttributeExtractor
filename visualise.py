@@ -1,5 +1,6 @@
-from evaluation.segmentation_results_visualise import visualise_all_class_pipeline_f1, visualise_all_pipeline_f1
+from evaluation.segmentation_results_visualise import visualise_all_class_pipeline_f1, visualise_all_pipeline_f1, generate_result_table
 from config import OUTPUT_DIR
 
 visualise_all_pipeline_f1(OUTPUT_DIR+"final_results_all_pipeline.csv")
 visualise_all_class_pipeline_f1((OUTPUT_DIR+"final_results_all_pipeline.csv"))
+generate_result_table((OUTPUT_DIR+"final_results_all_pipeline.csv"))

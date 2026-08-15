@@ -45,24 +45,36 @@ def visualise_all_class_pipeline_f1(path):
 
 def visualise_all_pipeline_f1(path):
     df = pd.read_csv(path)
-    metrics_plot = ["F1_IoU50", "mean_iou", "mean_dice"]
-    for metric in metrics_plot:
-        pivot_df = df.pivot(index="class", columns="pipeline", values=metric).sort_index()
+    metrics_plot = ["F1","F1_IoU50", "mean_iou", "mean_dice"]
+    fig, axes = plt.subplots(2, 2, figsize=(18, 12))
+    for i, metric in enumerate(metrics_plot):
+        row, col =i //2, i% 2
+        ax = axes[row, col]
 
-        width = 0.25
-        x = np.arange(len(pivot_df.index))
-        colors = {"Pipeline_A": "#B4E3B3", "Pipeline_B": "#319C43", "Pipeline_C": "#1B5E20"}
-        fig, ax = plt.subplots(figsize=(9, 4.5))
-        for i, pipeline in enumerate(pivot_df.columns):
-            ax.bar(x + (i - 1) * width, pivot_df[pipeline], width, label=pipeline, color=colors.get(pipeline))
-
-        ax.set_xticks(x)
-        ax.set_xticklabels(pivot_df.index, rotation=0, fontsize=10)
+        sns.barplot(data=df, x="class", y=metric, hue="pipeline", ax=ax, palette="Set1")
         ax.set_ylabel(metric)
         ax.set_ylim(0, 1.05)
-        ax.set_title(f"{metric.capitalize()} by Class and Pipeline", fontsize=12, fontweight="bold")
-        ax.legend(title="Pipeline", loc="upper center", bbox_to_anchor=(0.5, -0.15), ncol=3)
-        ax.grid(axis="y", linestyle="--", alpha=0.4)
-        plt.tight_layout()
-        save_path = os.path.dirname(path)+f"/class_level_pipeline_{metric}_plot.png"
-        plt.savefig(save_path, dpi=150, bbox_inches="tight")
+        ax.set_title(f"{metric.capitalize()} by Class and Pipeline", fontsize=12)
+        for container in ax.containers:
+            ax.bar_label(container, fmt="%.2f", label_type="center", fontsize=10, fontweight="bold", rotation=90)
+        if i == 3:
+            ax.legend(title="Pipeline", loc="lower right")
+        else:
+            ax.legend_.remove()
+    plt.tight_layout()
+    save_path = os.path.dirname(path)+f"/class_level_pipeline_{metric}_plot.png"
+    plt.savefig(save_path, dpi=150, bbox_inches="tight")
+
+def generate_result_table(path):
+    metric_map = {"F1": "F1", "Precision@IoU50": "precision_IoU50", "Recall@IoU50": "recall_IoU50", "F1@IoU50": "F1_IoU50", "MeanIoU": "mean_iou", "MeanDice": "mean_dice"}
+    df = pd.read_csv(path)
+    result_df = df.groupby(["class", "pipeline"]).agg({
+        col_name: "mean" for col_name in metric_map.values()
+    }).rename(columns={v:k for k, v in metric_map.items()})
+
+    result_df_pipeline = df.groupby(["pipeline"]).agg({
+            col_name: "mean" for col_name in metric_map.values()
+        }).rename(columns={v:k for k, v in metric_map.items()})
+
+    result_df.to_csv(os.path.dirname(path)+f"/result_table.csv")
+    result_df_pipeline.to_csv(os.path.dirname(path)+f"/result_df_pipeline.csv")

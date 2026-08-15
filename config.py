@@ -53,8 +53,8 @@ COCO_JSON_PATH = "D:/Dissertation/Final/annotations_last.json"
 # COCO_JSON_PATH = "D:/Dissertation/Test/Data/manual_tagging/Annotation_masks_details.json"
 
 
-# PIPELINES = ["Pipeline_A (Yolos)", "Pipeline_B (Segformer Hybrid)", "Pipeline_C (Grounding DINO)"]
-PIPELINES = ["Pipeline_B (Segformer Hybrid)"]
+PIPELINES = ["Pipeline_A (Yolos)", "Pipeline_B (Segformer Hybrid)", "Pipeline_C (Grounding DINO)"]
+# PIPELINES = ["Pipeline_B (Segformer Hybrid)"]
 PRED_MASK_PATH = "D:/Dissertation/Final/Data/Segmented_Files/Final_Segmented_Files/"
 
 CLIPPREDICTION_CSV = []
