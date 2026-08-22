@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 import numpy as np
+from sklearn.metrics import confusion_matrix
 from data.attributes_list import ATTRIBUTE_MAPPING
 
 
@@ -273,6 +274,38 @@ def routingaccuracy(merged_df, routing_column="predicted_base_style"):
         if total_images > 0:
             percentage = (rerouted_images / total_images) * 100
             print(f"\nBackground Context: {context}")
-            print(f"  Total images evaluated: {total_images}")
-            print(f"  Images re-routed:       {rerouted_images}")
-            print(f"  Percentage re-routed:   {percentage:.2f}%")
+            print(f"Total images evaluated: {total_images}")
+            print(f"Images re-routed: {rerouted_images}")
+            print(f"Percentage re-routed: {percentage:.2f}%")
+
+
+
+def generate_confusion_matrix(basepath, gt, pred, master_df):
+    master_df = master_df.replace('anbove_knee', 'above_knee')
+    tight_crop_df = master_df[master_df["Background Context"] == "segmented_b"]
+
+    direct_df = tight_crop_df[tight_crop_df["Prompt Method"] == "Direct"]
+    descriptive_df = tight_crop_df[tight_crop_df["Prompt Method"] == "Descriptive"]
+
+    direct_df = direct_df.dropna(subset=[gt, pred])
+    descriptive_df = descriptive_df.dropna(subset=[gt, pred])
+    labels = sorted(list(set(direct_df[gt]) | set(direct_df[pred]) | set(descriptive_df[gt]) | set(descriptive_df[pred])))
+
+    print(direct_df[gt])
+    print(descriptive_df[pred])
+
+    cm_direct = confusion_matrix(direct_df[gt], direct_df[pred], labels = labels)
+    cm_desc = confusion_matrix(descriptive_df[gt], descriptive_df[pred], labels = labels)
+
+    fig, axes = plt.subplots(1,2, figsize=(12,8))
+    sns.heatmap(cm_direct, annot=True, fmt="g", cmap="Blues", xticklabels=labels, yticklabels=labels, ax=axes[0], cbar=False)
+    axes[0].set_title("Direct Prompt (Tight Crop)")
+    axes[0].set_ylabel("True Label")
+    axes[0].set_xlabel("Predicted Label")
+    sns.heatmap(cm_desc, annot=True, fmt="g", cmap="Blues", xticklabels=labels, yticklabels=labels, ax=axes[1], cbar=False)
+    axes[1].set_title("Descriptive Prompt (Tight Crop)")
+    axes[1].set_ylabel("True Label")
+    axes[1].set_xlabel("Predicted Label")
+    plt.tight_layout()
+    plt.savefig(f"{basepath}/confusion_matrix_length.png", dpi=300)
+    # plt.show()

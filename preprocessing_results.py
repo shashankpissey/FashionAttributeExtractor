@@ -1,4 +1,4 @@
-from evaluation.preprocessing_results_visualise import load_allfiles, build_attribute_level_metrics, build_category_level_metrics, build_weighted_avg_per_attribute, build_pipeline_overall_summary, get_master_accuracy, visualise_preprocessing_asheatmap, routingaccuracy
+from evaluation.preprocessing_results_visualise import generate_confusion_matrix, load_allfiles, build_attribute_level_metrics, build_category_level_metrics, build_weighted_avg_per_attribute, build_pipeline_overall_summary, get_master_accuracy, visualise_preprocessing_asheatmap, routingaccuracy
 
 
 BASE_PATH = "D:/Dissertation/Final/Data/Segmented_Files/Final_Segmented_Files/results_tagging"
@@ -52,3 +52,6 @@ if __name__ == "__main__":
     main_table = get_master_accuracy(master_df)
     table_path = f"{BASE_PATH}/Final_Preprocessing_overall_accuracy.csv"
     main_table.to_csv(table_path)
+
+    main_table = generate_confusion_matrix(BASE_PATH, "tags.garment_length_class", "predicted_length", master_df)
+    
