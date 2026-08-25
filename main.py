@@ -28,27 +28,7 @@ def extraction_driver(person_detector, segmenter_obj, separator, zero_shot_model
             if file_name.endswith(('.png', '.jpg', '.jpeg', '.bmp', 'webp')):
                 basename = os.path.splitext(file_name)[0]
                 input_image_path = INPUT_IMAGES+file_name
-
-                # print("Detecting person")
-
-                # person_detect = person_detector.detect_person(input_image_path)
-
-                # print("Detected person")
-
-                # if person_detect:
-                #     print(f"Person detected and segmentatin for person is being performed")
-                #     cropped_person = person_detector.crop_person(input_image_path, person_detect)
-                #     print("Segmentation Started")
-                #     # segmenter_obj = Segmenter(SEGMENTATION_MODEL, device)
-                #     masks_list = segmenter_obj.extract_segmentation(cropped_person, separator, save=save, basename=basename)
-                #     print("Completed Main Segmentor and starting rest")
-                #     if save:
-                #         person_detector.save_person(cropped_person, output_dir)
-                #         print("Save person")
-
-                # else:
-                #     print(f"No Person detected in the image {input_image_path}")
-
+                
                 # Multiple people
 
                 all_people_box = person_detector.detect_all_people(input_image_path)

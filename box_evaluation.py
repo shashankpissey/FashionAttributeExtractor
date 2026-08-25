@@ -29,7 +29,7 @@ def call_SAM():
             metrics_table["box_threshold"] = b_threshold
             metrics_table["text_threshold"] = t_threshold
         
-            print("\nFINAL EVALUATION RESULTS")
+            print("Results")
             print(metrics_table)
             grid_search_results.append(metrics_table)
     final_metrics = pd.concat(grid_search_results, ignore_index=True)
@@ -55,7 +55,7 @@ def call_SAM():
             metrics_table["box_threshold"] = b_threshold
             metrics_table["text_threshold"] = t_threshold
         
-            print("\nFINAL EVALUATION RESULTS")
+            print("Results")
             print(metrics_table)
             grid_search_results.append(metrics_table)
     final_metrics = pd.concat(grid_search_results, ignore_index=True)
@@ -84,7 +84,7 @@ def call_YOLO():
             metrics_table["detection_threshold"] = d_threshold
             metrics_table["box_threshold"] = b_threshold
         
-            print("\nFINAL EVALUATION RESULTS")
+            print("Results")
             print(metrics_table)
             grid_search_results.append(metrics_table)
     final_metrics = pd.concat(grid_search_results, ignore_index=True)

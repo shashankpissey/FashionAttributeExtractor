@@ -27,6 +27,7 @@ class GroundingDINO:
         This method runs the inference on Grounding DINO based on the passed threshold and then returns the boxes and its correxponding labels. Code similar to huggingface for drawing the inference
         """
         image = Image.fromarray(image_obj)
+        # Code similar to Hugging Face
 
         inputs = self.processor(images=image, text=text_prompt, return_tensors="pt").to(self.device)
         with torch.no_grad():
@@ -65,7 +66,7 @@ class GroundingDINO:
             ratio = box_height / box_width if box_width > 0 else 0
 
             if category in ["top", "tshirt"]:
-                # 2.2 is derived from normal ratio from domain that a top always has a width < 2 to its height
+                # 2.2 is derived from normal ratio from domain that a top norally has a width < 2 to its height
                 if ratio > 2.2:
                     continue
             elif category in ["skirt", "pants"]:

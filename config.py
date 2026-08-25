@@ -64,10 +64,6 @@ METADATA_DIRECTORY = []
 OUTPUT_DIR = "D:/Dissertation/Final/Data/Segmented_Files/results/"
 
 
-
-# mattmdjafa key
-
-
 # # Input Location
 INPUT_IMAGES = ""
 # Save Locations

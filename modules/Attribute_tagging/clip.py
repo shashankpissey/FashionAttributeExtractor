@@ -114,6 +114,7 @@ class CLIP_SigLip_Attribute_Extractor:
         prompts = [template.format(category=category, candidate=map) for map in clean_mapping_candidates]
         logger.info(prompts)
         if self.model_name == "SigLip":
+            # Code similar to Hugging Face
             logger.info("Using SigLip model")
             text_inputs = self.tokeniser(prompts).to(self.device)
             with torch.no_grad():
@@ -133,7 +134,7 @@ class CLIP_SigLip_Attribute_Extractor:
         """
         This method is used to run as an end to end methodology.
         It starts to group the images based on category
-        Prepares the batch size using the torch dataloader
+        Prepares the batch size
         BAsed on the model type to be used extracts the embeddings for images, compares it using cosine similarity and tags the attributes.
         """
         category_groups = self.group_imagesper_category(folder_path)

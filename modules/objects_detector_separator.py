@@ -43,7 +43,7 @@ class ObjectsDetectorAndSeparate:
         try:
             obj_inputs = self.obj_processor(images=image_obj, return_tensors="pt").to(self.device)
             print("Obj Detection Started")
-
+            # code similar to hugging face
             with torch.no_grad():
                 obj_outputs = self.obj_model(**obj_inputs)
 

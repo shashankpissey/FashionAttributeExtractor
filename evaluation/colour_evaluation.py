@@ -85,7 +85,7 @@ class EvaluateColour:
         acc = accuracy_score(y_true, y_pred)
         report = classification_report(y_true, y_pred, output_dict=True, zero_division=0)
 
-        print(f"\n Top 1 Primary Color Evaluation")
+        print(f"Top 1 Primary Color Evaluation")
         print(f"Accuracy: {acc:.3f}")
         print(classification_report(y_true, y_pred, zero_division=0))
         df = pd.DataFrame(report).transpose()

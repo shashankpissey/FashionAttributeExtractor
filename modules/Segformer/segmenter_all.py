@@ -26,7 +26,7 @@ class SegmenterAll(BaseSegformer):
         min_px= int(min_px)
         conf_threshold = float(conf_threshold)
         image = Image.fromarray(image_obj)
-        
+        # Code similar to Hugging Face
         inputs = self.seg_processor(images=image, return_tensors="pt").to(self.device)
 
         with torch.no_grad():
