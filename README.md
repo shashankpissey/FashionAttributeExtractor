@@ -43,7 +43,7 @@ Finally the attributes are then saved in CSV format.
 ---
 ### Sample Process
 
-![End-To-End Process](readme_supporting_data/End-to-End_process.png)
+![End-to-End Process](readme_supporting_data/End-to-End_process.png)
 
 [Segmentation Pipeline Flowcharts](SEGMENTATION_TAGGING_PIPELINE.md)
 
