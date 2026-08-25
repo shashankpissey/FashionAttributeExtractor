@@ -20,37 +20,32 @@ The project is scoped for 7 major fashion categories which has 10 subcategories 
 ---
 - **Segmentation:** This component is responsible for isolating garments from multi-garment images. We analyse three different architectures where we use a semantic human parser model, closed-set object detector and an open-vocabulary object detector paired with foundational segmentation model Segment Anything model
 
-- Semantic Segmentation - [Semantic Model](https://huggingface.co/mattmdjaga/segformer_b2_clothes) Hybrid model paired with closed-set object detector to detect layered garments.
-- Closed-set Object Detector with SAM - [YOLOS based](https://huggingface.co/valentinafevu/yolos-fashionpedia) + SAM2.1-large
-- Open-Vocabulary Object Detector with SAM - [Grounded DINO](https://huggingface.co/IDEA-Research/grounding-dino-base) SAM2.1-large
+    - Semantic Segmentation - [Semantic Model](https://huggingface.co/mattmdjaga/segformer_b2_clothes) Hybrid model paired with closed-set object detector to detect layered garments.
+    - Closed-set Object Detector with SAM - [YOLOS based](https://huggingface.co/valentinafevu/yolos-fashionpedia) + SAM2.1-large
+    - Open-Vocabulary Object Detector with SAM - [Grounded DINO](https://huggingface.co/IDEA-Research/grounding-dino-base) SAM2.1-large
 
 - **Tagging:** This component is used to extract the fine-grained attributes like neckline, sleeve length, length, material etc... As established from literature, the attrinutes are category-dependent. Hence, we define the attribute lists with its set of attribute values valid to that category in [data](/data) folder. To tag attributes we compare two models
 
-- FashionCLIP - [FashionCLIP](https://huggingface.co/patrickjohncyh/fashion-clip)
-- FashionSigLip - [FashionSigLi](https://huggingface.co/Marqo/marqo-fashionSigLIP)
+    - FashionCLIP - [FashionCLIP](https://huggingface.co/patrickjohncyh/fashion-clip)
+    - FashionSigLip - [FashionSigLip](https://huggingface.co/Marqo/marqo-fashionSigLIP)
 
 Finally the attributes are then saved in CSV format.
-
-### Model Usage
-
-- All the modes used here are hosted on Hugging Face Hub and code to load and draw inference from models are used as shown in the respective model page on HuggingFace. Commented parts marks this usage in the code
-- To load the attribute labels provided by company we adapted the single starter script provided by them to fix errors and align the script modules to run on local machine. The script is just to load the loosely labelled attributes for ground truth dataset to PostgreSQL and is not added to this repository as it is private to commercial company. However, it contained JSON file of attributes and script which was loaded using SQLAlchemy following the SQLAlchemy documentation.
 
 ---
 ### Steps to Run the Code
 
 1. Run the pip install to install all the dependent packages using requirements.txt
 2. Update the config file to locations for input images, output paths and evaluation ground truth file paths (if running evaluation)
-3. Add input parameter **PIPELINE_A** or **PIPELINE_B** or **PIPELINE_C** separately or as a comma separated list if running all the three segmentation pipelines
+3. Update main.py with pipeline to be executed with values **PIPELINE_A** or **PIPELINE_B** or **PIPELINE_C** separately or as a comma separated list if running all the three segmentation pipelines
 4. Trigger main.py using the input parameters to trigger end-to-end process to run the segmentation step and tagging step.
 5. The final structures attributes is saved in respective folders as specified in the config.   
 
 ---
 ### Sample Process
 
-![End-To-End Process](/FashionAttributeExtractor/readme_supporting_data/End-to-End_process.png)
+![End-To-End Process](readme_supporting_data/End-to-End_process.png)
 
-[Segmentation Pipeline Flowcharts](/SEGMENTATION_TAGGING_PIPELINE.md)
+[Segmentation Pipeline Flowcharts](SEGMENTATION_TAGGING_PIPELINE.md)
 
 ---
 Folder Structure
@@ -107,3 +102,8 @@ FashionAttributeExtractor                           # Main Project folder
  |--- visualise.py                                  # Code to visualise the results of segmentation step
 ```
 
+---
+### Model Usage
+
+- All the modes used here are hosted on Hugging Face Hub and code to load and draw inference from models are used as shown in the respective model page on HuggingFace. Commented parts marks this usage in the code
+- To load the attribute labels provided by company we adapted the single starter script provided by them to fix errors and align the script modules to run on local machine. The script is just to load the loosely labelled attributes for ground truth dataset to PostgreSQL and is not added to this repository as it is private to commercial company. However, it contained JSON file of attributes and script which was loaded using SQLAlchemy following the SQLAlchemy documentation.
