@@ -450,6 +450,7 @@ class ObjectsDetectorAndSeparate:
             return obj_dict
         
     def get_garment_crops(self, mask, image_rgba, image_obj):
+        # Code adapted from AI . Prompt added in separate file.
         y_indices, x_indices = np.nonzero(mask)
         y0, y1 = np.min(y_indices), np.max(y_indices)
         x0, x1 = np.min(x_indices), np.max(x_indices)

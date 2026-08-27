@@ -8,6 +8,7 @@ from data.attributes_list import ATTRIBUTE_MAPPING
 
 
 def load_allfiles(paths):
+    # Code adapted from AI. Prompt added to prompt file
     all_summary_files = []
     all_class_files = []
     all_master_files = []
