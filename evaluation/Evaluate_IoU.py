@@ -26,6 +26,7 @@ class Evaluate_IoU:
 
         file_to_take = set(target_filenames)
         img_ids = []
+        # Code adapted from official pycocoDemo https://github.com/cocodataset/cocoapi/blob/master/PythonAPI/pycocoDemo.ipynb to filter the filenames and custom classes to map class labels used in project
         for img_id in coco.getImgIds():
             filename = coco.loadImgs(img_id)[0]["file_name"]
             if not filename.endswith("_p0.png"):

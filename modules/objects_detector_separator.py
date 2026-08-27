@@ -210,7 +210,7 @@ class ObjectsDetectorAndSeparate:
         obj_dict = {}
 
         try:
-            # Similar to hugging face
+            # Code Similar to hugging face
             obj_inputs = self.obj_processor(images=image_obj, return_tensors="pt").to(self.device)
             print("Obj Detection Started")
 

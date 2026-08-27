@@ -12,4 +12,5 @@ This file provides the methodology flowchart for Segmentation Pipeline
 
 ![Pipeline_C](./readme_supporting_data/Pipeline_C.jpg)
 
+## Tagging Architecture
 ![Tagging Process](./readme_supporting_data/Tagging_Process.jpg)

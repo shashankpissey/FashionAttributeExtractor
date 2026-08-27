@@ -97,6 +97,8 @@ class Segmenter(BaseSegformer):
                     continue
 
                 # If there are multiple small blobs continue without saving the mask as it is FP and small fragmented masks can provide no real value to prediction
+                # Code adapted from AI prompt
+                # Using pixel mask how can I check if the pixel mask is made of multiple blobs and if its more than 5 blobs?
                 mask_uint8 = (mask * 255).astype(np.uint8)
                 num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(mask_uint8, connectivity=8)
 
@@ -244,7 +246,8 @@ class Segmenter(BaseSegformer):
 
     def create_dim_external_mask(self, image_obj, target_mask, context_masks=None, opacity=0.25):
 
-        # Used to create the mask highlighted and context dimmed. 
+        # Used to create the mask highlighted and context dimmed.
+        # Code adapted from AI. 
         h, w = image_obj.shape[:2]
         alpha_mask = np.zeros((h,w), dtype=np.uint8)
         if context_masks:

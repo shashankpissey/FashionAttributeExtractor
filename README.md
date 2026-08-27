@@ -12,7 +12,7 @@ The project is scoped for 7 major fashion categories which has 10 subcategories 
 | **Dress** | Maxi, Mini, Jumpsuit, Rompers |
 | **Pants**  | Jeans, Shorts, Trousers |
 | **Tops** | T-Shirt, Shirt, Blouse |
-| **Shoes** | Boots, Ssandals |
+| **Shoes** | Boots, Sandals |
 | **Skirt** | Mini, Midi, Maxi |
 | **Outer Top** | Jacket, Cardigan |
 
@@ -24,7 +24,9 @@ The project is scoped for 7 major fashion categories which has 10 subcategories 
     - Closed-set Object Detector with SAM - [YOLOS based](https://huggingface.co/valentinafevu/yolos-fashionpedia) + SAM2.1-large
     - Open-Vocabulary Object Detector with SAM - [Grounded DINO](https://huggingface.co/IDEA-Research/grounding-dino-base) SAM2.1-large
 
-- **Tagging:** This component is used to extract the fine-grained attributes like neckline, sleeve length, length, material etc... As established from literature, the attrinutes are category-dependent. Hence, we define the attribute lists with its set of attribute values valid to that category in [data](/data) folder. To tag attributes we compare two models
+The segmentation pipeline takes input image, using YOLO crops the person from image. Then using the chosen segmentation pipeline architecture processes the cropped image to split the multi-garment image in to separate isolated garments. Each image outputs multiple garment items present in image that are scoped into a tight cropped garment mask, a contextual background image where garment is maintained at 100% brightness and rest contexts at 25% brightness, a full background image where garment is maintained at full background is maintained at 25% brightness and a greyscale mask used for evaluation. 
+
+- **Tagging:** This component is used to extract the fine-grained attributes like neckline, sleeve length, length, material etc... As established from literature, the attributes are category-dependent. Hence, we define the attribute lists with its set of attribute values valid to that category in [data](/data) folder. To tag attributes we compare two models
 
     - FashionCLIP - [FashionCLIP](https://huggingface.co/patrickjohncyh/fashion-clip)
     - FashionSigLip - [FashionSigLip](https://huggingface.co/Marqo/marqo-fashionSigLIP)
@@ -40,6 +42,30 @@ Finally the attributes are then saved in CSV format.
 4. Trigger main.py using the input parameters to trigger end-to-end process to run the segmentation step and tagging step.
 5. The final structures attributes is saved in respective folders as specified in the config.   
 
+--- 
+
+- Navigate to root directory
+```
+cd .\FashionAttributeExtractor\
+```
+
+- Create a virtual environment for installing packages (Optional) But the packages needs to be installed in main python installation if venv is skipped
+```
+python -m venv .venv
+```
+
+- Install all packages required using the below command
+```
+pip.exe install -r .\requirements.txt
+```
+
+- Update the config files for all the paths required - Input images folder, output location paths.
+- Change the pipeline that needs to be executed. Currently it is using Hybrib SegFormer pipeline which was found to be best for detection and tagging.
+- Run the python command to trigger the attribute extraction
+
+```
+python .\main.py
+```
 ---
 ### Sample Process
 
@@ -105,5 +131,5 @@ FashionAttributeExtractor                           # Main Project folder
 ---
 ### Model Usage
 
-- All the modes used here are hosted on Hugging Face Hub and code to load and draw inference from models are used as shown in the respective model page on HuggingFace. Commented parts marks this usage in the code
-- To load the attribute labels provided by company we adapted the single starter script provided by them to fix errors and align the script modules to run on local machine. The script is just to load the loosely labelled attributes for ground truth dataset to PostgreSQL and is not added to this repository as it is private to commercial company. However, it contained JSON file of attributes and script which was loaded using SQLAlchemy following the SQLAlchemy documentation.
+- All the models used here are hosted on Hugging Face Hub and code to load and draw inference from models are used as shown in the respective model page on HuggingFace and is noted as comments "Code similar to <<SOURCE>> or Code adapted from <<SOURCE>>".
+- To load the ground truth attribute labels provided by company we adapted the single starter script provided by them to fix errors and align the script modules to run on local machine. The script is just to load the loosely labelled attributes for ground truth dataset to PostgreSQL and is not added to this repository as it is private to commercial company. However, it contained JSON file with list of attributes defined in key:value pairs and the script to load was created using SQLAlchemy following the SQLAlchemy documentation.

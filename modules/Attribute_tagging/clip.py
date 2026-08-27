@@ -57,6 +57,7 @@ class CLIP_SigLip_Attribute_Extractor:
         This method is used to prepare the image. The image is read in RGBA and then only opaque picsls are obtained. The CLIP resize is left for its internal resize but the total image is made square by padding white pixels to shortest side.
         """
         try:
+            # Code adapted from AI. Prompts are added in separate file with submission
             image = Image.open(image_path).convert("RGBA")
             width, height = image.size
             square_size = max(width, height)

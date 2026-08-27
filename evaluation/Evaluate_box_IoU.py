@@ -18,6 +18,7 @@ def extract_coco_box():
     with open(eval_config.COCO_JSON_PATH, 'r') as gt_file:
         data = json.load(gt_file)
 
+    # code adapted from official pycocoDemo https://github.com/cocodataset/cocoapi/blob/master/PythonAPI/pycocoDemo.ipynb but reading as JSON so that I can get and merge boxes as required for the evaluation for F1, IoU
     category_mapping = {cat['id']: cat['name'] for cat in data.get('categories', [])}
     gt_db = {}
     annotations_list = {}
@@ -48,6 +49,7 @@ def extract_coco_box():
                 gt_db[image_id][cat_name] = [[xmin, ymin, xmax, ymax]]
                 
             else:
+                # Keep one single box for shoes and bag
                 gt_db[image_id][cat_name] = boxes
     image_id_to_fn_dict = {img["id"]: img["file_name"] for img in data.get("images",[])}
     return gt_db, image_id_to_fn_dict
