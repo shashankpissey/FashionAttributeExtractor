@@ -43,20 +43,24 @@ Finally the attributes are then saved in CSV format.
 5. The final structures attributes is saved in respective folders as specified in the config.   
 
 --- 
-
-- Navigate to root directory
-```
-cd .\FashionAttributeExtractor\
-```
-
 - Create a virtual environment for installing packages (Optional) But the packages needs to be installed in main python installation if venv is skipped
 ```
 python -m venv .venv
 ```
 
+- Activate the virtual environment created
+```
+.\.venv\Scripts\activate
+```
+
 - Install all packages required using the below command
 ```
 pip.exe install -r .\requirements.txt
+```
+
+- Navigate to root directory
+```
+cd .\FashionAttributeExtractor\
 ```
 
 - Update the config files for all the paths required - Input images folder, output location paths.

@@ -72,6 +72,6 @@ def execute_pipeline(pipeline_name):
 if __name__ == "__main__":
     # for pipeline in ["PIPELINE_A", "PIPELINE_C"]:
     create_folders()
-    for pipeline in ["PIPELINE_A"]:
+    for pipeline in ["PIPELINE_B"]:
         execute_pipeline(pipeline_name=pipeline)
         

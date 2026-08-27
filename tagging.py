@@ -7,7 +7,7 @@ def tag():
             file_name_to_save = data_folder.split("/")[-2]
             print(file_name_to_save)
         
-            extractor = CLIP_SigLip_Attribute_Extractor(device='cuda', model_name="CLIP", descriptive=True)
+            extractor = CLIP_SigLip_Attribute_Extractor(device='cuda', model_name="SigLip", descriptive=True)
             
             results_df = extractor.extract_attributes(data_folder, batch_size=32, file_name_to_save=file_name_to_save)
             
