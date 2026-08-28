@@ -29,7 +29,7 @@ def extraction_driver(person_detector, segmenter_obj, separator, zero_shot_model
                 basename = os.path.splitext(file_name)[0]
                 input_image_path = INPUT_IMAGES+file_name
                 
-                # Multiple people
+                # Multiple people crop
 
                 all_people_box = person_detector.detect_all_people(input_image_path)
                 logger.info(f"for image {basename}, detected all people {len(all_people_box)}")
